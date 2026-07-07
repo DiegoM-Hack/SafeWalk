@@ -1,4 +1,4 @@
-package com.example.safewalk
+package ec.edu.esfot.safewalk
 
 import io.flutter.embedding.android.FlutterActivity
 
