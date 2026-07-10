@@ -5,6 +5,7 @@ import '../../screens/auth/register_screen.dart';
 //import '../../screens/auth/splash_screen.dart';
 import '../../screens/home/home_screen.dart';
 //import '../../screens/profile/profile_screen.dart';
+import '../../screens/contacts/contacts_screen.dart';
 
 class AppRoutes {
   // Nombres de las rutas
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String home = '/home';
   static const String profile = '/profile';
+  static const String contacts = '/contacts';
 
   /// Rutas de la aplicación
   static Map<String, WidgetBuilder> routes = {
@@ -21,5 +23,6 @@ class AppRoutes {
     register: (context) => const RegisterScreen(),
     home: (context) => const HomeScreen(),
     //profile: (context) => const ProfileScreen(),
+    contacts: (context) => const ContactsScreen(),
   };
 }
