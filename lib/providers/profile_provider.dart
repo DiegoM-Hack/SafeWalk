@@ -22,10 +22,7 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      DocumentSnapshot doc = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
       if (doc.exists) {
         _currentUser = UserModel.fromMap(doc.data() as Map<String, dynamic>);
       }
@@ -36,11 +33,10 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // Actualizar datos del perfil
   Future<bool> updateUserProfile({
-    required String name,
+    required String name, 
     required String email,
+    required String phone,
   }) async {
     final user = _auth.currentUser;
     if (user == null || _currentUser == null) return false;
@@ -49,21 +45,17 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Actualizamos localmente
       _currentUser = UserModel(
         uid: _currentUser!.uid,
         name: name,
         email: email,
+        phone: phone,
         photoUrl: _currentUser!.photoUrl,
-        emergencyContacts: _currentUser!.emergencyContacts,
       );
 
       // Guardamos en Firebase Firestore
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .update(_currentUser!.toMap());
-
+      await _firestore.collection('users').doc(user.uid).update(_currentUser!.toMap());
+      
       _isLoading = false;
       notifyListeners();
       return true;
