@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'providers/location_provider.dart';
-import 'screens/tracking_screen.dart';
+import 'core/routes/app_routes.dart';
 
-class App extends StatelessWidget {
-  const App({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => LocationProvider()),
-      ],
-      child: MaterialApp(
-        title: 'SafeWalk',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorSchemeSeed: Colors.blue,
-          useMaterial3: true,
-        ),
-        home: const TrackingScreen(),
+    return MaterialApp(
+      title: "SafeWalk",
+      debugShowCheckedModeBanner: false,
+
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
+
+      initialRoute: AppRoutes.splash,
+
+      routes: AppRoutes.routes,
     );
   }
 }

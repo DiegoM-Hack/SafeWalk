@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/contact_provider.dart';
+import 'providers/location_provider.dart';
+import 'providers/trip_provider.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -19,8 +22,17 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => ContactProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => LocationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TripProvider(),
+        ),
       ],
-      child: const App(),
+      child: const MyApp(),
     ),
   );
 }

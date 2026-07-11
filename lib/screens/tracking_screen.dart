@@ -74,7 +74,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       child: ElevatedButton.icon(
                         onPressed: provider.isTracking
                             ? provider.stopTracking
-                            : provider.startTracking,
+                            : () => provider.startTracking(),
                         icon: Icon(provider.isTracking ? Icons.stop : Icons.play_arrow),
                         label: Text(provider.isTracking ? 'Detener' : 'Iniciar seguimiento'),
                       ),
