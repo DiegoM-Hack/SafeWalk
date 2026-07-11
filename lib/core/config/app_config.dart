@@ -11,5 +11,5 @@ class AppConfig {
   /// Luego reemplaza este valor y también el que está en:
   ///   - android/app/src/main/AndroidManifest.xml (meta-data com.google.android.geo.API_KEY)
   ///   - ios/Runner/AppDelegate.swift (GMSServices.provideAPIKey)
-  static const String googleMapsApiKey = 'TU_API_KEY_DE_GOOGLE_MAPS';
+  static const String googleMapsApiKey = 'AIzaSyBzFnpgn3JbQ-XVfJ7aEg8n1Pc_EVV8jec';
 }
