@@ -68,18 +68,17 @@ class _TrackingScreenState extends State<TrackingScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: provider.isTracking
-                            ? provider.stopTracking
-                            : () => provider.startTracking(),
-                        icon: Icon(provider.isTracking ? Icons.stop : Icons.play_arrow),
-                        label: Text(provider.isTracking ? 'Detener' : 'Iniciar seguimiento'),
-                      ),
+                child: Center(
+                  child: SizedBox(
+                    width: 220,
+                    child: ElevatedButton.icon(
+                      onPressed: provider.isTracking
+                          ? provider.stopTracking
+                          : () => provider.startTracking(),
+                      icon: Icon(provider.isTracking ? Icons.stop : Icons.play_arrow),
+                      label: Text(provider.isTracking ? 'Detener' : 'Iniciar seguimiento'),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],

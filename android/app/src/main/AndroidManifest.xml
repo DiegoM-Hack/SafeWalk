@@ -6,10 +6,10 @@
         android:label="safewalk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- Reemplaza con tu API Key de Google Maps (Maps SDK for Android) -->
+    
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="TU_API_KEY_DE_GOOGLE_MAPS"/>
+            android:value="AIzaSyBzFnpgn3JbQ-XVfJ7aEg8n1Pc_EVV8jec"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
