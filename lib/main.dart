@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'providers/sos_provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/contact_provider.dart';
@@ -20,8 +20,13 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(),
         ),
+        feature/sos
+
+        ChangeNotifierProvider(
+          create: (_) => SOSProvider(),
         ChangeNotifierProvider(
           create: (_) => ContactProvider(),
+       main
         ),
       ],
       child: const App(),
