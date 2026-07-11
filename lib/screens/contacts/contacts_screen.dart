@@ -16,7 +16,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
   @override
   void initState() {
     super.initState();
-    // Empieza a escuchar los contactos en tiempo real al entrar a la pantalla.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ContactProvider>().listenToContacts();
     });

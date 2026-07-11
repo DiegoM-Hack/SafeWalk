@@ -20,9 +20,6 @@ class ContactProvider extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  /// Se llama una vez el usuario está autenticado (por ejemplo, desde
-  /// el HomeScreen o justo después del login) para empezar a escuchar
-  /// los contactos en tiempo real.
   void listenToContacts() {
     _setLoading(true);
 

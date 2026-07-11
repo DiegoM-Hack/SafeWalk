@@ -1,30 +1,42 @@
-// This is a basic Flutter widget test.
+// Smoke test de SafeWalk.
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// Verifica que la pantalla de inicio de sesión se construya
+// correctamente y muestre sus elementos principales.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:safewalk/main.dart';
+import 'package:safewalk/providers/auth_provider.dart';
+import 'package:safewalk/screens/auth/login_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('LoginScreen muestra los campos y el botón de inicio de sesión',
+      (WidgetTester tester) async {
+    // Construimos solo LoginScreen (no App completo), envuelto en su
+    // Provider necesario, para no depender de Firebase.initializeApp()
+    // ni del sistema de rutas durante el test.
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: const MaterialApp(
+          home: LoginScreen(),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verifica que el título y los campos del formulario existan.
+    expect(find.text('SafeWalk'), findsOneWidget);
+    expect(find.text('Correo electrónico'), findsOneWidget);
+    expect(find.text('Contraseña'), findsOneWidget);
+    expect(find.text('Iniciar sesión'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    // Intenta enviar el formulario vacío y verifica que aparezcan
+    // los mensajes de validación.
+    await tester.tap(find.text('Iniciar sesión'));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Ingrese su correo'), findsOneWidget);
+    expect(find.text('Ingrese su contraseña'), findsOneWidget);
   });
 }

@@ -5,8 +5,6 @@ import '../../models/emergency_contact_model.dart';
 import '../../providers/contact_provider.dart';
 
 class ContactFormScreen extends StatefulWidget {
-  /// Si viene un [contact], la pantalla funciona en modo edición.
-  /// Si es null, funciona en modo creación.
   final EmergencyContactModel? contact;
 
   const ContactFormScreen({super.key, this.contact});

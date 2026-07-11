@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────
+    // users/{userId}  →  datos privados del usuario
+    // ─────────────────────────────────────────────
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // ---- Contactos de emergencia (Persona 2) ----
+      match /contacts/{contactId} {
+        allow read, delete: if request.auth != null
+                              && request.auth.uid == userId;
+
+        allow create: if request.auth != null
+                        && request.auth.uid == userId
+                        && request.resource.data.keys().hasAll(['name', 'phone', 'relationship'])
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0
+                        && request.resource.data.name.size() <= 100
+                        && request.resource.data.phone is string
+                        && request.resource.data.phone.size() > 0
+                        && request.resource.data.phone.size() <= 20
+                        && request.resource.data.relationship is string
+                        && request.resource.data.relationship.size() <= 50;
+
+        allow update: if request.auth != null
+                        && request.auth.uid == userId
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0
+                        && request.resource.data.name.size() <= 100
+                        && request.resource.data.phone is string
+                        && request.resource.data.phone.size() > 0
+                        && request.resource.data.phone.size() <= 20;
+      }
+
+      match /{subcollection}/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // Colecciones globales (referencia para el resto del equipo)
+    // ─────────────────────────────────────────────
+    match /emergency_alerts/{alertId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                      && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+                              && resource.data.uid == request.auth.uid;
+    }
+
+    match /public_routes/{routeId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                      && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+                              && resource.data.uid == request.auth.uid;
+    }
+
+    match /reports/{reportId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                      && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+                              && resource.data.uid == request.auth.uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

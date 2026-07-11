@@ -18,6 +18,7 @@ class AppRoutes {
 
   /// Rutas de la aplicación
   static Map<String, WidgetBuilder> routes = {
+    splash: (context) => const LoginScreen(),
     //splash: (context) => const SplashScreen(),
     login: (context) => const LoginScreen(),
     register: (context) => const RegisterScreen(),

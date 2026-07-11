@@ -15,7 +15,6 @@ class EmergencyContactModel {
     this.createdAt,
   });
 
-  /// Crea el modelo a partir de un DocumentSnapshot de Firestore.
   factory EmergencyContactModel.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
@@ -37,8 +36,6 @@ class EmergencyContactModel {
     );
   }
 
-  /// Para guardar/actualizar en Firestore (no incluye el id,
-  /// ya que ese lo maneja el documento mismo).
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
