@@ -12,7 +12,20 @@
           "package_name": "ec.edu.esfot.safewalk"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "576850851737-i78o4co3gac5oum7140cfurk60jf3kfk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ec.edu.esfot.safewalk",
+            "certificate_hash": "3eda75c78aef203c3e018c4924dee4e8290e891b"
+          }
+        },
+        {
+          "client_id": "576850851737-sctd8s9kemqb6rqrdhenn7rudgkvt9qm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD8qwFuwObJQdV_3OaFBcw2aTiINzMi-2c"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "576850851737-sctd8s9kemqb6rqrdhenn7rudgkvt9qm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
