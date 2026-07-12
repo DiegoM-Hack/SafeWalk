@@ -53,7 +53,7 @@ class ProfileProvider with ChangeNotifier {
         photoUrl: _currentUser!.photoUrl,
       );
 
-      // Guardamos en Firebase Firestore
+      // Se guarda en Firebase Firestore
       await _firestore.collection('users').doc(user.uid).update(_currentUser!.toMap());
       
       _isLoading = false;
