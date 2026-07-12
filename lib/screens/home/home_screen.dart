@@ -1,6 +1,6 @@
-
-
 import 'package:flutter/material.dart';
+
+import '../../core/routes/app_routes.dart';
 
 class HomeScreen extends StatelessWidget {
 
@@ -15,9 +15,13 @@ class HomeScreen extends StatelessWidget {
         title: const Text("SafeWalk"),
       ),
 
-      body: const Center(
-        child: Text(
-          "Bienvenido",
+      body: Center(
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pushNamed(AppRoutes.contacts);
+          },
+          icon: const Icon(Icons.contacts),
+          label: const Text("Contactos de emergencia"),
         ),
       ),
 
