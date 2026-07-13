@@ -10,21 +10,15 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: "SafeWalk",
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-      ),
-    feature/sos
-      home: const Scaffold(
-        body: Center(
-          child: Text('SafeWalk'),
-        ),
       ),
 
       initialRoute: AppRoutes.splash,
 
       routes: AppRoutes.routes,
-      main
     );
   }
 }

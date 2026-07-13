@@ -51,6 +51,10 @@ class ProfileProvider with ChangeNotifier {
         email: email,
         phone: phone,
         photoUrl: _currentUser!.photoUrl,
+        provider: _currentUser!.provider,
+        isActive: _currentUser!.isActive,
+        createdAt: _currentUser!.createdAt,
+        updatedAt: Timestamp.now(), 
       );
 
       // Se guarda en Firebase Firestore
