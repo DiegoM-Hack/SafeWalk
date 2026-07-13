@@ -5,6 +5,8 @@ import 'providers/sos_provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/contact_provider.dart';
+import 'providers/profile_provider.dart'; 
+import 'providers/history_provider.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -20,8 +22,12 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(),
         ),
-        feature/sos
-
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HistoryProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => SOSProvider(),
         ChangeNotifierProvider(
