@@ -5,12 +5,12 @@ class TripModel {
   final String id;
   final DateTime startTime;
   final DateTime? endTime;
-  final double distance; // en kilómetros
-  final double duration; // en minutos
+  final double distance;
+  final double duration;
   final String originAddress;
   final String destinationAddress;
   final List<LatLng> route;
-  final String status; // 'activo' | 'finalizado'
+  final String status;
 
   TripModel({
     required this.id,
@@ -24,7 +24,6 @@ class TripModel {
     required this.status,
   });
 
-  /// Crea el modelo a partir de un DocumentSnapshot de Firestore.
   factory TripModel.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
@@ -48,8 +47,33 @@ class TripModel {
     );
   }
 
-  /// Para guardar/actualizar en Firestore (no incluye el id,
-  /// ya que ese lo maneja el documento mismo).
+  factory TripModel.fromMap(String id, Map<String, dynamic> map) {
+    return TripModel(
+      id: id,
+      startTime: map['startTime'] is Timestamp
+          ? (map['startTime'] as Timestamp).toDate()
+          : DateTime.parse(map['startTime'].toString()),
+      endTime: map['endTime'] is Timestamp
+          ? (map['endTime'] as Timestamp).toDate()
+          : map['endTime'] != null
+              ? DateTime.parse(map['endTime'].toString())
+              : null,
+      distance: (map['distance'] ?? 0).toDouble(),
+      duration: (map['duration'] ?? 0).toDouble(),
+      originAddress: map['originAddress'] ?? '',
+      destinationAddress: map['destinationAddress'] ?? '',
+      route: (map['route'] as List<dynamic>? ?? [])
+          .map(
+            (p) => LatLng(
+              (p['lat'] as num).toDouble(),
+              (p['lng'] as num).toDouble(),
+            ),
+          )
+          .toList(),
+      status: map['status'] ?? 'finalizado',
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       'startTime': Timestamp.fromDate(startTime),
@@ -58,8 +82,21 @@ class TripModel {
       'duration': duration,
       'originAddress': originAddress,
       'destinationAddress': destinationAddress,
-      'route':
-          route.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList(),
+      'route': route.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList(),
+      'status': status,
+    };
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'startTime': startTime,
+      'endTime': endTime,
+      'distance': distance,
+      'duration': duration,
+      'originAddress': originAddress,
+      'destinationAddress': destinationAddress,
+      'route': route.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList(),
       'status': status,
     };
   }

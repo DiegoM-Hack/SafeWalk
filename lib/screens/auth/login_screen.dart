@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/routes/app_routes.dart';
 import '../../providers/auth_provider.dart';
-import '../home/home_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,14 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _emailController =
-      TextEditingController();
-
-  final TextEditingController _passwordController =
-      TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
 
@@ -31,13 +25,12 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> login() async {
-
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final auth = context.read<AuthProvider>();
+    final authProvider = context.read<AuthProvider>();
 
-    final success = await auth.login(
+    final success = await authProvider.login(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
     );
@@ -45,207 +38,130 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const HomeScreen(),
-        ),
-      );
-
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? "Error"),
+          content: Text(authProvider.errorMessage ?? 'Error al iniciar sesión'),
         ),
       );
-
     }
+  }
 
+  Future<void> _googleLogin() async {
+    final authProvider = context.read<AuthProvider>();
+
+    final success = await authProvider.loginGoogle();
+
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Error con Google'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final auth = context.watch<AuthProvider>();
+    final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-
       appBar: AppBar(
-        title: const Text("Iniciar sesión"),
-        centerTitle: true,
+        title: const Text('Iniciar sesión'),
       ),
-
-      body: SafeArea(
-
-        child: Center(
-
-          child: SingleChildScrollView(
-
-            padding: const EdgeInsets.all(24),
-
-            child: Form(
-
-              key: _formKey,
-
-              child: Column(
-
-                children: [
-
-                  const Icon(
-                    Icons.shield,
-                    size: 100,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "SafeWalk",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  TextFormField(
-
-                    controller: _emailController,
-
-                    keyboardType: TextInputType.emailAddress,
-
-                    decoration: const InputDecoration(
-                      labelText: "Correo electrónico",
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
-                    ),
-
-                    validator: (value) {
-
-                      if (value == null || value.isEmpty) {
-                        return "Ingrese su correo";
-                      }
-
-                      return null;
-
-                    },
-
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  TextFormField(
-
-                    controller: _passwordController,
-
-                    obscureText: _obscurePassword,
-
-                    decoration: InputDecoration(
-
-                      labelText: "Contraseña",
-
-                      border: const OutlineInputBorder(),
-
-                      prefixIcon: const Icon(Icons.lock),
-
-                      suffixIcon: IconButton(
-
-                        icon: Icon(
-
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-
-                        onPressed: () {
-
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-
-                        },
-
-                      ),
-
-                    ),
-
-                    validator: (value) {
-
-                      if (value == null || value.isEmpty) {
-                        return "Ingrese su contraseña";
-                      }
-
-                      return null;
-
-                    },
-
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  SizedBox(
-
-                    width: double.infinity,
-
-                    height: 50,
-
-                    child: ElevatedButton(
-
-                      onPressed: auth.isLoading ? null : login,
-
-                      child: auth.isLoading
-                          ? const CircularProgressIndicator()
-                          : const Text(
-                              "Iniciar sesión",
-                            ),
-
-                    ),
-
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  TextButton(
-
-                    onPressed: () {
-
-                      Navigator.push(
-
-                        context,
-
-                        MaterialPageRoute(
-
-                          builder: (_) =>
-                              const RegisterScreen(),
-
-                        ),
-
-                      );
-
-                    },
-
-                    child: const Text(
-                      "Crear una cuenta",
-                    ),
-
-                  ),
-
-                ],
-
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Correo',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingrese su correo';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Correo inválido';
+                  }
+                  return null;
+                },
               ),
-
-            ),
-
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Contraseña',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingrese la contraseña';
+                  }
+                  if (value.length < 6) {
+                    return 'Mínimo 6 caracteres';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: authProvider.isLoading ? null : _login,
+                  child: authProvider.isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Iniciar sesión'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: authProvider.isLoading ? null : _googleLogin,
+                  icon: const Icon(Icons.login),
+                  label: const Text('Continuar con Google'),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.forgotPassword);
+                },
+                child: const Text('¿Olvidaste tu contraseña?'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.register);
+                },
+                child: const Text('Crear una cuenta'),
+              ),
+            ],
           ),
-
         ),
-
       ),
-
     );
-
   }
-
 }
