@@ -18,24 +18,30 @@ Future<void> main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ProfileProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => HistoryProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => SOSProvider(),
-        ChangeNotifierProvider(
-          create: (_) => ContactProvider(),
-       main
-        ),
-      ],
-      child: const App(),
+  providers: [
+
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
     ),
+
+    ChangeNotifierProvider(
+      create: (_) => SOSProvider(),
+    ),
+
+    ChangeNotifierProvider(
+      create: (_) => ContactProvider(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => ProfileProvider(),
+    ),
+    ChangeNotifierProvider(
+      create: (_) => HistoryProvider(),
+    ),
+
+  ],
+
+  child: const App(),
+)
+  
   );
 }

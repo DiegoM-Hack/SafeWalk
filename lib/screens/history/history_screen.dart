@@ -58,7 +58,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     "${trip.startTime.hour.toString().padLeft(2, '0')}:${trip.startTime.minute.toString().padLeft(2, '0')}";
 
                 return Card(
-                  margin: const EdgeInsets.bottom(12.0),
+                  margin: const EdgeInsets.only(bottom: 12.0), //fix bottom
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
