@@ -13,6 +13,7 @@ class HistoryProvider with ChangeNotifier {
   List<TripModel> get trips => _trips;
   bool get isLoading => _isLoading;
 
+  // Carga las rutas guardadas del usuario actual en Firebase
   Future<void> loadTripHistory() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -32,7 +33,7 @@ class HistoryProvider with ChangeNotifier {
         return TripModel.fromMap(doc.id, doc.data());
       }).toList();
     } catch (e) {
-      debugPrint("Error crítico al cargar el historial de viajes: $e");
+      debugPrint("Error al cargar historial de rutas: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
