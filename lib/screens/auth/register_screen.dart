@@ -50,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Cuenta creada correctamente"),
+          content: Text('Cuenta creada correctamente'),
         ),
       );
 
@@ -62,8 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            authProvider.errorMessage ??
-                "No se pudo crear la cuenta",
+            authProvider.errorMessage ?? 'No se pudo crear la cuenta',
           ),
         ),
       );
@@ -86,8 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            authProvider.errorMessage ??
-                "Error al iniciar con Google",
+            authProvider.errorMessage ?? 'Error al iniciar con Google',
           ),
         ),
       );
@@ -100,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Crear cuenta"),
+        title: const Text('Crear cuenta'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -108,67 +106,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
           key: _formKey,
           child: Column(
             children: [
-
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: "Nombre completo",
+                  labelText: 'Nombre completo',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Ingrese su nombre";
+                    return 'Ingrese su nombre';
                   }
                   return null;
                 },
               ),
-
               const SizedBox(height: 15),
-
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
-                  labelText: "Teléfono",
+                  labelText: 'Teléfono',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
               ),
-
               const SizedBox(height: 15),
-
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: "Correo",
+                  labelText: 'Correo',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Ingrese el correo";
+                    return 'Ingrese el correo';
                   }
-
-                  if (!value.contains("@")) {
-                    return "Correo inválido";
+                  if (!value.contains('@')) {
+                    return 'Correo inválido';
                   }
-
                   return null;
                 },
               ),
-
               const SizedBox(height: 15),
-
               TextFormField(
                 controller: _passwordController,
                 obscureText: _hidePassword,
                 decoration: InputDecoration(
-                  labelText: "Contraseña",
+                  labelText: 'Contraseña',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _hidePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      _hidePassword ? Icons.visibility : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -179,98 +166,71 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Ingrese la contraseña";
+                    return 'Ingrese la contraseña';
                   }
-
                   if (value.length < 6) {
-                    return "La contraseña debe tener al menos 6 caracteres";
+                    return 'La contraseña debe tener al menos 6 caracteres';
                   }
-
                   return null;
                 },
               ),
-
               const SizedBox(height: 15),
-
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: _hideConfirmPassword,
                 decoration: InputDecoration(
-                  labelText: "Confirmar contraseña",
+                  labelText: 'Confirmar contraseña',
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _hideConfirmPassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      _hideConfirmPassword ? Icons.visibility : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
-                        _hideConfirmPassword =
-                            !_hideConfirmPassword;
+                        _hideConfirmPassword = !_hideConfirmPassword;
                       });
                     },
                   ),
                 ),
                 validator: (value) {
                   if (value != _passwordController.text) {
-                    return "Las contraseñas no coinciden";
+                    return 'Las contraseñas no coinciden';
                   }
-
                   return null;
                 },
               ),
-
               const SizedBox(height: 25),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed:
-                      authProvider.isLoading ? null : _register,
+                  onPressed: authProvider.isLoading ? null : _register,
                   child: authProvider.isLoading
                       ? const CircularProgressIndicator()
-                      : const Text("Crear cuenta"),
+                      : const Text('Crear cuenta'),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: authProvider.isLoading
-                      ? null
-                      : _registerGoogle,
+                  onPressed: authProvider.isLoading ? null : _registerGoogle,
                   icon: const Icon(Icons.login),
-                  label: const Text(
-                    "Continuar con Google",
-                  ),
+                  label: const Text('Continuar con Google'),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
-                  const Text(
-                    "¿Ya tienes una cuenta?",
-                  ),
-
+                  const Text('¿Ya tienes una cuenta?'),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text(
-                      "Inicia sesión",
-                    ),
+                    child: const Text('Inicia sesión'),
                   ),
-
                 ],
               ),
-
             ],
           ),
         ),

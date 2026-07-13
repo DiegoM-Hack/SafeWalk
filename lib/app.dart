@@ -8,16 +8,13 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "SafeWalk",
+      title: 'SafeWalk',
       debugShowCheckedModeBanner: false,
-
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
       ),
-
       initialRoute: AppRoutes.splash,
-
       routes: AppRoutes.routes,
     );
   }

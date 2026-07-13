@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() &&
+             request.auth.uid == userId;
+    }
+
+    // Información del usuario
+    match /users/{userId} {
+
+      allow create: if isOwner(userId);
+
+      allow read, update, delete: if isOwner(userId);
+
+      // Contactos
+      match /contacts/{contactId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Recorridos
+      match /trips/{tripId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Configuración
+      match /settings/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Notificaciones
+      match /notifications/{notificationId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Reportes públicos o compartidos
+    match /reports/{reportId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    // Alertas SOS (podrán ajustarlas cuando implementen esa funcionalidad)
+    match /emergency_alerts/{alertId} {
+      allow create: if signedIn();
+      allow read: if signedIn();
+      allow update, delete: if false;
+    }
+  }
+}
