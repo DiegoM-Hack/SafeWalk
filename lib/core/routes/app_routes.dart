@@ -4,9 +4,10 @@ import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
 import '../../screens/splash/splash_screen.dart';
 import '../../screens/home/home_screen.dart';
-//import '../../screens/profile/profile_screen.dart';
 import '../../screens/contacts/contacts_screen.dart';
 import '../../screens/auth/forgot_password_screen.dart';
+import '../../screens/profile/profile_screen.dart'; // ➜ Importa tu Perfil
+import '../../screens/history/history_screen.dart';
 
 class AppRoutes {
   // Nombres de las rutas
@@ -17,6 +18,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String profile = '/profile';
   static const String contacts = '/contacts';
+  static const String history = '/history';
 
   /// Rutas de la aplicación
   static Map<String, WidgetBuilder> routes = {
@@ -24,8 +26,9 @@ class AppRoutes {
     login: (context) => const LoginScreen(),
     register: (context) => const RegisterScreen(),
     home: (context) => const HomeScreen(),
-    //profile: (context) => const ProfileScreen(),
+    profile: (context) => const ProfileScreen(),
     contacts: (context) => const ContactsScreen(),
     forgotPassword: (context) => const ForgotPasswordScreen(),
+    history: (context) => const HistoryScreen(),
   };
 }
