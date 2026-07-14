@@ -41,6 +41,16 @@ class HomeScreen extends StatelessWidget {
               label: const Text('Historial'),
             ),
             const SizedBox(height: 12),
+
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.sos);
+              },
+              icon: const Icon(Icons.warning_amber_rounded),
+              label: const Text('Emergencia SOS'),
+            ),
+            
+            const SizedBox(height: 12),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pushNamed(AppRoutes.profile);
