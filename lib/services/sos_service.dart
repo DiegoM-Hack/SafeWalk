@@ -10,7 +10,7 @@ class SOSService {
     required String message,
   }) async {
     await _firestore.collection('emergency_alerts').add({
-      'userId': userId,
+      'uid': userId,
       'latitude': latitude,
       'longitude': longitude,
       'message': message,

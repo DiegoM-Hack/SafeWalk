@@ -34,6 +34,9 @@ class EmergencyContactModel {
       name: map['name'] ?? '',
       phone: map['phone'] ?? '',
       relationship: map['relationship'] ?? '',
+      createdAt: map['createdAt'] is Timestamp
+          ? (map['createdAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -56,6 +59,7 @@ class EmergencyContactModel {
       'name': name,
       'phone': phone,
       'relationship': relationship,
+      'createdAt': createdAt,
     };
   }
 
