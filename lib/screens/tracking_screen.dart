@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../core/theme/app_theme.dart';
 import '../providers/location_provider.dart';
 
 class TrackingScreen extends StatefulWidget {
@@ -15,9 +16,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Seguimiento SafeWalk'),
-      ),
+      appBar: AppBar(title: const Text('Seguimiento SafeWalk')),
       body: Consumer<LocationProvider>(
         builder: (context, provider, _) {
           final position = provider.currentPosition;
@@ -51,7 +50,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Polyline(
                       polylineId: const PolylineId('route'),
                       points: polylinePoints,
-                      color: Colors.blue,
+                      color: AppColors.primary,
                       width: 4,
                     ),
                   },
@@ -66,17 +65,27 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: SizedBox(
-                    width: 220,
+                    width: double.infinity,
                     child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: provider.isTracking
+                            ? AppColors.danger
+                            : AppColors.primary,
+                      ),
                       onPressed: provider.isTracking
                           ? provider.stopTracking
                           : () => provider.startTracking(),
-                      icon: Icon(provider.isTracking ? Icons.stop : Icons.play_arrow),
-                      label: Text(provider.isTracking ? 'Detener' : 'Iniciar seguimiento'),
+                      icon: Icon(
+                        provider.isTracking ? Icons.stop : Icons.play_arrow,
+                      ),
+                      label: Text(
+                        provider.isTracking ? 'Detener' : 'Iniciar seguimiento',
+                      ),
                     ),
                   ),
                 ),

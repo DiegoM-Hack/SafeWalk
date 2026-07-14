@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -10,10 +11,9 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'SafeWalk',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.routes,
     );

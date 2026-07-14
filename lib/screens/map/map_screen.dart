@@ -3,6 +3,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../services/directions_service.dart';
@@ -16,8 +17,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final DirectionsService _directionsService = DirectionsService();
-  final TextEditingController _destinationController =
-      TextEditingController();
+  final TextEditingController _destinationController = TextEditingController();
 
   GoogleMapController? _mapController;
 
@@ -26,7 +26,6 @@ class _MapScreenState extends State<MapScreen> {
   Set<Polyline> _routePolylines = {};
   bool _isSearchingRoute = false;
 
-  // Posición de respaldo mientras se obtiene el GPS real (Quito, Ecuador).
   static const LatLng _fallbackPosition = LatLng(-0.1807, -78.4678);
 
   @override
@@ -41,9 +40,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final current = locationProvider.currentPosition;
     if (current != null) {
-      _mapController?.animateCamera(
-        CameraUpdate.newLatLngZoom(current, 16),
-      );
+      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(current, 16));
     }
   }
 
@@ -97,7 +94,7 @@ class _MapScreenState extends State<MapScreen> {
           Polyline(
             polylineId: const PolylineId('ruta_sugerida'),
             points: route,
-            color: Colors.blue,
+            color: AppColors.primary,
             width: 5,
           ),
         };
@@ -146,8 +143,9 @@ class _MapScreenState extends State<MapScreen> {
       tripProvider.startTrip(
         origin: origin,
         originAddress: 'Ubicación actual',
-        destinationAddress:
-            _destinationAddress.isEmpty ? 'Sin destino' : _destinationAddress,
+        destinationAddress: _destinationAddress.isEmpty
+            ? 'Sin destino'
+            : _destinationAddress,
       );
 
       locationProvider.startTracking(
@@ -172,10 +170,49 @@ class _MapScreenState extends State<MapScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Recorrido finalizado'),
-        content: Text(
-          'Distancia: ${distanceKm.toStringAsFixed(2)} km\n'
-          'Duración: ${duration.inMinutes} min',
+        insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+        contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+        title: Row(
+          children: [
+            Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle_outline,
+                color: AppColors.success,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Expanded + maxLines evita el overflow en pantallas angostas:
+            // el texto hace wrap en vez de salirse del diálogo.
+            const Expanded(
+              child: Text(
+                'Recorrido finalizado',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SummaryRow(
+              label: 'Distancia',
+              value: '${distanceKm.toStringAsFixed(2)} km',
+            ),
+            const SizedBox(height: 8),
+            _SummaryRow(label: 'Duración', value: '${duration.inMinutes} min'),
+          ],
         ),
         actions: [
           TextButton(
@@ -188,13 +225,14 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final locationProvider = context.watch<LocationProvider>();
     final tripProvider = context.watch<TripProvider>();
 
@@ -205,9 +243,7 @@ class _MapScreenState extends State<MapScreen> {
         Marker(
           markerId: const MarkerId('destino'),
           position: _destination!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
           infoWindow: const InfoWindow(title: 'Destino'),
         ),
     };
@@ -218,7 +254,7 @@ class _MapScreenState extends State<MapScreen> {
         Polyline(
           polylineId: const PolylineId('recorrido_en_vivo'),
           points: tripProvider.routePoints,
-          color: Colors.green,
+          color: AppColors.success,
           width: 5,
         ),
       );
@@ -229,49 +265,97 @@ class _MapScreenState extends State<MapScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
+                // Expanded ya protege el campo de texto en pantallas angostas.
                 Expanded(
                   child: TextField(
                     controller: _destinationController,
                     decoration: const InputDecoration(
                       labelText: 'Destino',
                       hintText: 'Escribe una dirección',
-                      border: OutlineInputBorder(),
-                      isDense: true,
+                      prefixIcon: Icon(Icons.search),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _isSearchingRoute ? null : _searchRoute,
-                  icon: _isSearchingRoute
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.directions_walk),
+                const SizedBox(width: 10),
+                Material(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: _isSearchingRoute ? null : _searchRoute,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: _isSearchingRoute
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.directions_walk,
+                              color: Colors.white,
+                            ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
           if (locationProvider.errorMessage != null)
             Padding(
-              padding: const EdgeInsets.only(bottom: 8, left: 12, right: 12),
-              child: Text(
-                locationProvider.errorMessage!,
-                style: const TextStyle(color: Colors.red),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  locationProvider.errorMessage!,
+                  style: const TextStyle(color: AppColors.danger, fontSize: 13),
+                  // Evita overflow si el mensaje de error es largo.
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
               ),
             ),
           if (tripProvider.isTripActive)
             Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                'Rastreando: ${tripProvider.distanceKm.toStringAsFixed(2)} km · '
-                '${tripProvider.elapsed.inMinutes} min',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.circle,
+                      color: AppColors.success,
+                      size: 10,
+                    ),
+                    const SizedBox(width: 8),
+                    // Expanded + ellipsis: en pantallas angostas el texto
+                    // se trunca en vez de forzar overflow horizontal.
+                    Expanded(
+                      child: Text(
+                        'Rastreando · ${tripProvider.distanceKm.toStringAsFixed(2)} km · ${tripProvider.elapsed.inMinutes} min',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.textTheme.bodyLarge?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           Expanded(
@@ -291,15 +375,37 @@ class _MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _toggleTracking,
-        icon: Icon(
-          locationProvider.isTracking ? Icons.stop : Icons.play_arrow,
-        ),
+        icon: Icon(locationProvider.isTracking ? Icons.stop : Icons.play_arrow),
         label: Text(
           locationProvider.isTracking ? 'Detener' : 'Iniciar seguimiento',
         ),
-        backgroundColor:
-            locationProvider.isTracking ? Colors.red : Colors.blue,
+        backgroundColor: locationProvider.isTracking
+            ? AppColors.danger
+            : AppColors.primary,
       ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _SummaryRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: theme.textTheme.bodyMedium),
+        Text(
+          value,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
     );
   }
 }
