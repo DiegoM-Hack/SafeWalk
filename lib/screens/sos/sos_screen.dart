@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../providers/sos_provider.dart';
 
 class SOSScreen extends StatelessWidget {
@@ -49,9 +50,9 @@ class SOSScreen extends StatelessWidget {
 
               Card(
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
-                    children: [
+                    children: const [
                       Row(
                         children: [
                           Icon(Icons.location_on, color: Colors.red),
@@ -64,9 +65,7 @@ class SOSScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       SizedBox(height: 10),
-
                       Text(
                         "Esperando información del GPS...",
                         textAlign: TextAlign.center,
@@ -76,9 +75,8 @@ class SOSScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 30),
-
               const SizedBox(height: 40),
+
               sosProvider.isLoading
                   ? const CircularProgressIndicator()
                   : ElevatedButton.icon(
@@ -87,7 +85,7 @@ class SOSScreen extends StatelessWidget {
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 60),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadiusGeometry.circular(15),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                       ),
                       onPressed: () async {
@@ -119,11 +117,29 @@ class SOSScreen extends StatelessWidget {
 
                         if (confirmar != true) return;
 
+                        final authProvider = context.read<AuthProvider>();
+                        final uid = authProvider.user?.uid;
+
+                        if (uid == null) {
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: Colors.red,
+                              content: Text(
+                                "Debes iniciar sesión para enviar una alerta SOS.",
+                              ),
+                            ),
+                          );
+
+                          return;
+                        }
+
                         // TODO: Reemplazar las coordenadas temporales por las
                         // obtenidas desde LocationProvider cuando esté implementado.
 
                         final ok = await sosProvider.sendSOS(
-                          userId: "usuario_prueba",
+                          userId: uid,
                           latitude: -0.229,
                           longitude: -78.524,
                           message: "Necesito ayuda",
