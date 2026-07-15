@@ -165,12 +165,17 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _authService.logout();
-
-    _firebaseUser = null;
-    _userModel = null;
-
-    notifyListeners();
+    // Si el proveedor externo (ej. Google en web sin Client ID) falla,
+    // igual limpiamos el estado local para que la UI navegue a login.
+    try {
+      await _authService.logout();
+    } catch (_) {
+      // Ya se maneja/loguea dentro de AuthService; no bloqueamos el logout local.
+    } finally {
+      _firebaseUser = null;
+      _userModel = null;
+      notifyListeners();
+    }
   }
 
   Future<bool> resetPassword(String email) async {
