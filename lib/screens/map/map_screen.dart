@@ -94,7 +94,7 @@ class _MapScreenState extends State<MapScreen> {
           Polyline(
             polylineId: const PolylineId('ruta_sugerida'),
             points: route,
-            color: AppColors.primary,
+            color: AppColors.teal,
             width: 5,
           ),
         };
@@ -281,7 +281,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 const SizedBox(width: 10),
                 Material(
-                  color: AppColors.primary,
+                  color: AppColors.teal,
                   borderRadius: BorderRadius.circular(14),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(14),
@@ -381,7 +381,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
         backgroundColor: locationProvider.isTracking
             ? AppColors.danger
-            : AppColors.primary,
+            : AppColors.teal,
       ),
     );
   }
