@@ -21,7 +21,26 @@ service cloud.firestore {
 
       // Contactos
       match /contacts/{contactId} {
-        allow read, write: if isOwner(userId);
+        allow read, delete: if isOwner(userId);
+
+        allow create: if isOwner(userId)
+                        && request.resource.data.keys().hasAll(['name', 'phone', 'relationship'])
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0
+                        && request.resource.data.name.size() <= 100
+                        && request.resource.data.phone is string
+                        && request.resource.data.phone.size() > 0
+                        && request.resource.data.phone.size() <= 20
+                        && request.resource.data.relationship is string
+                        && request.resource.data.relationship.size() <= 50;
+
+        allow update: if isOwner(userId)
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0
+                        && request.resource.data.name.size() <= 100
+                        && request.resource.data.phone is string
+                        && request.resource.data.phone.size() > 0
+                        && request.resource.data.phone.size() <= 20;
       }
 
       // Recorridos
@@ -45,6 +64,15 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if signedIn();
       allow update, delete: if false;
+    }
+
+    // Rutas públicas compartidas (Persona 3 - GPS/rutas)
+    match /public_routes/{routeId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+                      && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if signedIn()
+                              && resource.data.uid == request.auth.uid;
     }
 
     // Alertas SOS (podrán ajustarlas cuando implementen esa funcionalidad)
