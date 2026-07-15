@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/location_provider.dart';
 import '../../providers/sos_provider.dart';
 
 class SOSScreen extends StatelessWidget {
@@ -11,6 +12,7 @@ class SOSScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sosProvider = Provider.of<SOSProvider>(context);
+    final locationProvider = Provider.of<LocationProvider>(context);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -29,9 +31,7 @@ class SOSScreen extends StatelessWidget {
                 color: Colors.red,
                 size: 100,
               ),
-
               const SizedBox(height: 20),
-
               const Text(
                 "EMERGENCIA",
                 style: TextStyle(
@@ -39,15 +39,12 @@ class SOSScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               const Text(
                 "Si te encuentras en una situación de riesgo, presiona el botón para enviar una alerta de emergencia con tu ubicación.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
-
               const SizedBox(height: 30),
 
               Card(
@@ -70,9 +67,12 @@ class SOSScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
-                              'Esperando información del GPS...',
+                              locationProvider.currentPosition == null
+                                  ? 'Esperando información del GPS...'
+                                  : 'Lat: ${locationProvider.currentPosition!.latitude.toStringAsFixed(6)}\n'
+                                      'Lng: ${locationProvider.currentPosition!.longitude.toStringAsFixed(6)}',
                               style: theme.textTheme.bodyMedium,
                             ),
                           ],
@@ -139,14 +139,32 @@ class SOSScreen extends StatelessWidget {
                               ),
                             ),
                           );
+                          return;
+                        }
 
+                        // Obtener ubicación actual
+                        await locationProvider.loadCurrentLocation();
+
+                        final position = locationProvider.currentPosition;
+
+                        if (position == null) {
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              backgroundColor: AppColors.danger,
+                              content: Text(
+                                "No fue posible obtener tu ubicación.",
+                              ),
+                            ),
+                          );
                           return;
                         }
 
                         final ok = await sosProvider.sendSOS(
                           userId: uid,
-                          latitude: -0.229,
-                          longitude: -78.524,
+                          latitude: position.latitude,
+                          longitude: position.longitude,
                           message: "Necesito ayuda",
                         );
 
