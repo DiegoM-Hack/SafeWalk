@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/emergency_contact_model.dart';
@@ -117,45 +118,82 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameController,
+                      // Bloquea números y símbolos mientras escribe; solo
+                      // deja letras (con tildes/ñ) y espacios.
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]'),
+                        ),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Nombre completo',
+                        hintText: 'Ej: Juan Pérez',
                         prefixIcon: Icon(Icons.person_outline),
                       ),
                       textCapitalization: TextCapitalization.words,
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty
-                          ? 'El nombre es obligatorio.'
-                          : null,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'El nombre es obligatorio.';
+                        }
+                        if (!RegExp(
+                          r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$',
+                        ).hasMatch(value)) {
+                          return 'El nombre solo puede contener letras.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _phoneController,
+                      // Solo dígitos, máximo 10 (bloquea letras y símbolos
+                      // mientras escribe).
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Teléfono',
+                        hintText: 'Ej: 0991234567',
                         prefixIcon: Icon(Icons.phone_outlined),
                       ),
                       keyboardType: TextInputType.phone,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return 'El teléfono es obligatorio.';
-                        final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-                        if (digitsOnly.length < 7)
-                          return 'Ingresa un teléfono válido.';
+                        }
+                        if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                          return 'El teléfono debe tener 10 dígitos.';
+                        }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _relationshipController,
+                      // La relación también es texto: solo letras y espacios.
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]'),
+                        ),
+                      ],
                       decoration: const InputDecoration(
-                        labelText: 'Relación (ej. Madre, Hermano, Amigo)',
+                        labelText: 'Relación',
+                        hintText: 'Ej: Madre, Hermano, Amigo',
                         prefixIcon: Icon(Icons.diversity_3_outlined),
                       ),
                       textCapitalization: TextCapitalization.sentences,
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty
-                          ? 'La relación es obligatoria.'
-                          : null,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'La relación es obligatoria.';
+                        }
+                        if (!RegExp(
+                          r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$',
+                        ).hasMatch(value)) {
+                          return 'La relación solo puede contener letras.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 28),
                     ElevatedButton(

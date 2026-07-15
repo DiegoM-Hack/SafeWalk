@@ -50,7 +50,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Polyline(
                       polylineId: const PolylineId('route'),
                       points: polylinePoints,
-                      color: AppColors.primary,
+                      color: AppColors.teal,
                       width: 4,
                     ),
                   },
@@ -75,7 +75,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: provider.isTracking
                             ? AppColors.danger
-                            : AppColors.primary,
+                            : AppColors.teal,
                       ),
                       onPressed: provider.isTracking
                           ? provider.stopTracking

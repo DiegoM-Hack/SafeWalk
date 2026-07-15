@@ -100,7 +100,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.teal,
         onPressed: () {
           Navigator.of(
             context,

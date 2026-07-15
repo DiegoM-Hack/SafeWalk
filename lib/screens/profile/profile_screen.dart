@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -147,13 +148,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 24),
                     TextFormField(
                       controller: _nameController,
+                      // Bloquea números y símbolos mientras escribe; solo
+                      // deja letras (con tildes/ñ) y espacios.
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]'),
+                        ),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Nombre completo',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.person_outline),
                       ),
-                      validator: (value) =>
-                          value!.isEmpty ? 'Ingresa tu nombre' : null,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Ingresa tu nombre';
+                        }
+                        if (!RegExp(
+                          r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$',
+                        ).hasMatch(value)) {
+                          return 'El nombre solo puede contener letras';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -168,14 +185,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _phoneController,
+                      // Solo dígitos, máximo 10 (bloquea letras y símbolos
+                      // mientras escribe).
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                       decoration: const InputDecoration(
                         labelText: 'Teléfono de contacto',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.phone_android),
                       ),
                       keyboardType: TextInputType.phone,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Ingresa tu teléfono' : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Ingresa tu teléfono';
+                        }
+                        if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                          return 'El teléfono debe tener 10 dígitos';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 32),
                     ElevatedButton(
