@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/sos_provider.dart';
 
@@ -10,6 +11,7 @@ class SOSScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sosProvider = Provider.of<SOSProvider>(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -51,24 +53,30 @@ class SOSScreen extends StatelessWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: const [
-                      Row(
-                        children: [
-                          Icon(Icons.location_on, color: Colors.red),
-                          SizedBox(width: 10),
-                          Text(
-                            "Ubicación",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        color: AppColors.danger,
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Esperando información del GPS...",
-                        textAlign: TextAlign.center,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ubicación',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Esperando información del GPS...',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -125,7 +133,7 @@ class SOSScreen extends StatelessWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.danger,
                               content: Text(
                                 "Debes iniciar sesión para enviar una alerta SOS.",
                               ),
@@ -134,9 +142,6 @@ class SOSScreen extends StatelessWidget {
 
                           return;
                         }
-
-                        // TODO: Reemplazar las coordenadas temporales por las
-                        // obtenidas desde LocationProvider cuando esté implementado.
 
                         final ok = await sosProvider.sendSOS(
                           userId: uid,
@@ -150,7 +155,7 @@ class SOSScreen extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor:
-                                ok ? Colors.green : Colors.red,
+                                ok ? AppColors.success : AppColors.danger,
                             content: Text(
                               ok
                                   ? "Alerta enviada correctamente"

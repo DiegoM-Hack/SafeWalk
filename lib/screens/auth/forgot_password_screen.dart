@@ -7,16 +7,12 @@ class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() =>
-      _ForgotPasswordScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState
-    extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
-
   bool _loading = false;
 
   @override
@@ -27,130 +23,107 @@ class _ForgotPasswordScreenState
 
   Future<void> _resetPassword() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     final authProvider = context.read<AuthProvider>();
 
     try {
-      await authProvider.resetPassword(
-        _emailController.text.trim(),
-      );
-
+      await authProvider.resetPassword(_emailController.text.trim());
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            "Se envió un correo para restablecer tu contraseña.",
-          ),
+          content: Text('Se envió un correo para restablecer tu contraseña.'),
         ),
       );
-
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
 
-    if (mounted) {
-      setState(() {
-        _loading = false;
-      });
-    }
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Recuperar contraseña"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-
-              const Icon(
-                Icons.lock_reset,
-                size: 80,
-              ),
-
-              const SizedBox(height: 20),
-
-              const Text(
-                "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 25),
-
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: "Correo electrónico",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Ingrese un correo";
-                  }
-
-                  if (!value.contains("@")) {
-                    return "Correo inválido";
-                  }
-
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 25),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _loading
-                      ? null
-                      : _resetPassword,
-                  child: _loading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+      appBar: AppBar(title: const Text('Recuperar contraseña')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        height: 72,
+                        width: 72,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.12,
                           ),
-                        )
-                      : const Text(
-                          "Enviar correo",
+                          shape: BoxShape.circle,
                         ),
+                        child: Icon(
+                          Icons.lock_reset,
+                          size: 34,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 28),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'Correo electrónico',
+                        prefixIcon: Icon(Icons.mail_outline),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Ingrese un correo';
+                        if (!value.contains('@')) return 'Correo inválido';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _loading ? null : _resetPassword,
+                      child: _loading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Enviar correo'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Volver al inicio de sesión'),
+                    ),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 15),
-
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  "Volver al inicio de sesión",
-                ),
-              ),
-
-            ],
+            ),
           ),
         ),
       ),

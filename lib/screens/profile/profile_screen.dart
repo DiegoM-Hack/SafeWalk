@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile_provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (user != null) {
           _nameController.text = user.name;
           _emailController.text = user.email;
-          _phoneController.text = user.phone; 
+          _phoneController.text = user.phone;
         }
       });
     });
@@ -36,6 +37,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
+  }
+
+  void _showImageSourceDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Tomar foto'),
+              onTap: () async {
+                Navigator.pop(context);
+                final success = await context
+                    .read<ProfileProvider>()
+                    .updateProfilePhoto(ImageSource.camera);
+                if (!mounted) return;
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Foto actualizada correctamente'),
+                    ),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Elegir de galería'),
+              onTap: () async {
+                Navigator.pop(context);
+                final success = await context
+                    .read<ProfileProvider>()
+                    .updateProfilePhoto(ImageSource.gallery);
+                if (!mounted) return;
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Foto actualizada correctamente'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -52,10 +101,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: _formKey,
                 child: ListView(
                   children: [
-                    const Center(
-                      child: CircleAvatar(
-                        radius: 50,
-                        child: Icon(Icons.person, size: 50),
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage:
+                                profileProvider.currentUser?.photoUrl != null &&
+                                    profileProvider
+                                        .currentUser!
+                                        .photoUrl!
+                                        .isNotEmpty
+                                ? NetworkImage(
+                                    profileProvider.currentUser!.photoUrl!,
+                                  )
+                                : null,
+                            child:
+                                profileProvider.currentUser?.photoUrl == null ||
+                                    profileProvider
+                                        .currentUser!
+                                        .photoUrl!
+                                        .isEmpty
+                                ? const Icon(Icons.person, size: 50)
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () => _showImageSourceDialog(context),
+                              child: CircleAvatar(
+                                radius: 16,
+                                backgroundColor: Theme.of(context).primaryColor,
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -77,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      enabled: false, 
+                      enabled: false,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -98,18 +184,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          final success = await profileProvider.updateUserProfile(
-                            name: _nameController.text,
-                            email: _emailController.text,
-                            phone: _phoneController.text,
-                          );
-                          
+                          final success = await profileProvider
+                              .updateUserProfile(
+                                name: _nameController.text,
+                                email: _emailController.text,
+                                phone: _phoneController.text,
+                              );
+
                           if (!mounted) return;
-                          
+
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Perfil actualizado correctamente'),
+                                content: Text(
+                                  'Perfil actualizado correctamente',
+                                ),
                               ),
                             );
                           }

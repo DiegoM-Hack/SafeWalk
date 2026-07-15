@@ -51,6 +51,7 @@ class ContactProvider extends ChangeNotifier {
         name: name,
         phone: phone,
         relationship: relationship,
+        createdAt: DateTime.now(),
       );
 
       await _contactService.addContact(newContact);
