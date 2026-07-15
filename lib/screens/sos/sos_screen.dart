@@ -6,187 +6,227 @@ import '../../providers/auth_provider.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/sos_provider.dart';
 
-class SOSScreen extends StatelessWidget {
+class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
 
   @override
+  State<SOSScreen> createState() => _SOSScreenState();
+}
+
+class _SOSScreenState extends State<SOSScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<LocationProvider>().loadCurrentLocation();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final sosProvider = Provider.of<SOSProvider>(context);
-    final locationProvider = Provider.of<LocationProvider>(context);
+    final sosProvider = context.watch<SOSProvider>();
+    final locationProvider = context.watch<LocationProvider>();
+    final authProvider = context.read<AuthProvider>();
     final theme = Theme.of(context);
+
+    final position = locationProvider.currentPosition;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("SafeWalk"),
         centerTitle: true,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.red,
-                size: 100,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "EMERGENCIA",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Si te encuentras en una situación de riesgo, presiona el botón para enviar una alerta de emergencia con tu ubicación.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 30),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: 100,
+            ),
 
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        color: AppColors.danger,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ubicación',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              locationProvider.currentPosition == null
-                                  ? 'Esperando información del GPS...'
-                                  : 'Lat: ${locationProvider.currentPosition!.latitude.toStringAsFixed(6)}\n'
-                                      'Lng: ${locationProvider.currentPosition!.longitude.toStringAsFixed(6)}',
+            const SizedBox(height: 20),
+
+            const Text(
+              "EMERGENCIA",
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              "Si te encuentras en una situación de riesgo, presiona el botón para enviar una alerta.",
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 30),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.danger,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: position == null
+                          ? Text(
+                              "Obteniendo ubicación...",
                               style: theme.textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              sosProvider.isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 60),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      onPressed: () async {
-                        final confirmar = await showDialog<bool>(
-                          context: context,
-                          builder: (dialogContext) {
-                            return AlertDialog(
-                              title: const Text("Confirmar alerta"),
-                              content: const Text(
-                                "¿Estás seguro de enviar una alerta SOS?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(false);
-                                  },
-                                  child: const Text("Cancelar"),
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Ubicación actual",
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                FilledButton(
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop(true);
-                                  },
-                                  child: const Text("Enviar"),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Lat: ${position.latitude.toStringAsFixed(6)}",
+                                ),
+                                Text(
+                                  "Lng: ${position.longitude.toStringAsFixed(6)}",
                                 ),
                               ],
-                            );
-                          },
-                        );
-
-                        if (confirmar != true) return;
-
-                        final authProvider = context.read<AuthProvider>();
-                        final uid = authProvider.user?.uid;
-
-                        if (uid == null) {
-                          if (!context.mounted) return;
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: AppColors.danger,
-                              content: Text(
-                                "Debes iniciar sesión para enviar una alerta SOS.",
-                              ),
                             ),
-                          );
-                          return;
-                        }
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
-                        // Obtener ubicación actual
-                        await locationProvider.loadCurrentLocation();
+            const SizedBox(height: 40),
 
-                        final position = locationProvider.currentPosition;
+            if (sosProvider.isLoading)
+              const CircularProgressIndicator()
 
-                        if (position == null) {
-                          if (!context.mounted) return;
+            else if (!sosProvider.isEmergencyActive)
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 60),
+                ),
+                icon: const Icon(Icons.sos),
+                label: const Text("ENVIAR ALERTA SOS"),
+                onPressed: () async {
+                  final confirmar = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Confirmar"),
+                      content: const Text(
+                        "¿Deseas enviar una alerta SOS?",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text("Cancelar"),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text("Enviar"),
+                        ),
+                      ],
+                    ),
+                  );
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: AppColors.danger,
-                              content: Text(
-                                "No fue posible obtener tu ubicación.",
-                              ),
-                            ),
-                          );
-                          return;
-                        }
+                  if (confirmar != true) return;
 
-                        final ok = await sosProvider.sendSOS(
-                          userId: uid,
-                          latitude: position.latitude,
-                          longitude: position.longitude,
-                          message: "Necesito ayuda",
-                        );
+                  if (position == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "No se pudo obtener la ubicación.",
+                        ),
+                      ),
+                    );
+                    return;
+                  }
 
-                        if (!context.mounted) return;
+                  final uid = authProvider.user?.uid;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor:
-                                ok ? AppColors.success : AppColors.danger,
-                            content: Text(
-                              ok
-                                  ? "Alerta enviada correctamente"
-                                  : "Error:\n${sosProvider.errorMessage}",
-                            ),
-                          ),
+                  if (uid == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        backgroundColor: AppColors.danger,
+                        content: Text("Debes iniciar sesión."),
+                      ),
+                    );
+                    return;
+                  }
+
+                  final ok = await sosProvider.sendSOS(
+                    userId: uid,
+                    latitude: position.latitude,
+                    longitude: position.longitude,
+                    message: "Necesito ayuda",
+                  );
+
+                  if (!mounted) return;
+
+                  if (ok) {
+                    locationProvider.startTracking(
+                      onPositionUpdate: (newPosition) async {
+                        await sosProvider.updateLocation(
+                          latitude: newPosition.latitude,
+                          longitude: newPosition.longitude,
                         );
                       },
-                      icon: const Icon(Icons.sos),
-                      label: const Text("ENVIAR ALERTA SOS"),
+                    );
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor:
+                          ok ? AppColors.success : AppColors.danger,
+                      content: Text(
+                        ok
+                            ? "Alerta enviada correctamente"
+                            : sosProvider.errorMessage ?? "Error",
+                      ),
                     ),
-            ],
-          ),
+                  );
+                },
+              )
+
+            else
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 60),
+                ),
+                icon: const Icon(Icons.check),
+                label: const Text("FINALIZAR SOS"),
+                onPressed: () async {
+                  locationProvider.stopTracking();
+
+                  await sosProvider.finishSOS();
+
+                  if (!mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "Emergencia finalizada.",
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
         ),
       ),
     );

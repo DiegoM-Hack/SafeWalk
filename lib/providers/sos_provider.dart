@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../services/sos_service.dart';
 
@@ -9,9 +8,14 @@ class SOSProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  bool get isLoading => _isLoading;
+  String? _currentAlertId;
+  bool _isEmergencyActive = false;
 
+  bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  bool get isEmergencyActive => _isEmergencyActive;
+  String? get currentAlertId => _currentAlertId;
 
   Future<bool> sendSOS({
     required String userId,
@@ -22,14 +26,17 @@ class SOSProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      await _sosService.sendEmergencyAlert(
+      _currentAlertId = await _sosService.sendEmergencyAlert(
         userId: userId,
         latitude: latitude,
         longitude: longitude,
         message: message,
       );
 
+      _isEmergencyActive = true;
       _errorMessage = null;
+
+      notifyListeners();
       return true;
     } catch (e, stackTrace) {
       debugPrint("========== ERROR SOS ==========");
@@ -42,6 +49,30 @@ class SOSProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+  }) async {
+    if (_currentAlertId == null) return;
+
+    await _sosService.updateLocation(
+      alertId: _currentAlertId!,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
+
+  Future<void> finishSOS() async {
+    if (_currentAlertId == null) return;
+
+    await _sosService.finishAlert(_currentAlertId!);
+
+    _currentAlertId = null;
+    _isEmergencyActive = false;
+
+    notifyListeners();
   }
 
   void clearError() {
