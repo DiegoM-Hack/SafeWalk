@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_theme.dart';
 import '../../providers/history_provider.dart';
 
 class HistoryScreen extends StatefulWidget {

@@ -41,4 +41,10 @@ class ContactService {
   Future<void> deleteContact(String contactId) async {
     await _contactsRef.doc(contactId).delete();
   }
+
+  /// NUEVO: guarda el uid de SafeWalk encontrado para este contacto
+  /// (o lo limpia si se pasa null), sin tocar el resto de sus campos.
+  Future<void> setLinkedUid(String contactId, String? uid) async {
+    await _contactsRef.doc(contactId).update({'linkedUid': uid});
+  }
 }

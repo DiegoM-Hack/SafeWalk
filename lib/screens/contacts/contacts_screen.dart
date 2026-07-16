@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/emergency_contact_model.dart';
 import '../../providers/contact_provider.dart';
 import 'contact_form_screen.dart';
+import '../map/share_location_sheet.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -134,26 +135,77 @@ class _ContactTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          '${contact.relationship} · ${contact.phone}',
+          contact.isSafeWalkUser
+              ? '${contact.relationship} · ${contact.phone} · en SafeWalk'
+              : '${contact.relationship} · ${contact.phone}',
           style: theme.textTheme.bodyMedium,
         ),
-        trailing: PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: theme.textTheme.bodyMedium?.color),
-          onSelected: (value) {
-            if (value == 'edit') {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ContactFormScreen(contact: contact),
-                ),
-              );
-            } else if (value == 'delete') {
-              _confirmDelete(context, contact);
-            }
-          },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'edit', child: Text('Editar')),
-            PopupMenuItem(value: 'delete', child: Text('Eliminar')),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Acceso directo a "Compartir ubicación" solo si el contacto
+            // ya está vinculado a una cuenta real de SafeWalk.
+            if (contact.isSafeWalkUser)
+              IconButton(
+                icon: const Icon(Icons.share_location, color: AppColors.teal),
+                tooltip: 'Compartir ubicación',
+                onPressed: () => _openShareSheet(context, contact),
+              ),
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert, color: theme.textTheme.bodyMedium?.color),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ContactFormScreen(contact: contact),
+                    ),
+                  );
+                } else if (value == 'delete') {
+                  _confirmDelete(context, contact);
+                } else if (value == 'link') {
+                  _linkContact(context, contact);
+                } else if (value == 'share') {
+                  _openShareSheet(context, contact);
+                }
+              },
+              itemBuilder: (_) => [
+                if (contact.isSafeWalkUser)
+                  const PopupMenuItem(value: 'share', child: Text('Compartir ubicación'))
+                else
+                  const PopupMenuItem(value: 'link', child: Text('Vincular con SafeWalk')),
+                const PopupMenuItem(value: 'edit', child: Text('Editar')),
+                const PopupMenuItem(value: 'delete', child: Text('Eliminar')),
+              ],
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _openShareSheet(BuildContext context, EmergencyContactModel contact) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radius)),
+      ),
+      builder: (_) => ShareLocationSheet(contact: contact),
+    );
+  }
+
+  Future<void> _linkContact(BuildContext context, EmergencyContactModel contact) async {
+    final provider = context.read<ContactProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    final linked = await provider.linkContactToSafeWalkUser(contact);
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          linked
+              ? '${contact.name} ya usa SafeWalk. Ahora puedes compartirle tu ubicación.'
+              : provider.errorMessage ?? 'Ese contacto todavía no tiene cuenta en SafeWalk.',
         ),
       ),
     );

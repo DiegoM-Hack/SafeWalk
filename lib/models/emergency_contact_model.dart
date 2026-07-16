@@ -6,6 +6,12 @@ class EmergencyContactModel {
   final String phone;
   final String relationship;
   final DateTime? createdAt;
+  // NUEVO: uid del usuario de SafeWalk al que corresponde este contacto,
+  // si es que este contacto también tiene cuenta en la app (se resuelve
+  // buscando su teléfono en el índice de usuarios). Si es null, el
+  // contacto es solo información de agenda y no se le puede enviar una
+  // solicitud de "compartir ubicación en tiempo real".
+  final String? linkedUid;
 
   EmergencyContactModel({
     required this.id,
@@ -13,7 +19,11 @@ class EmergencyContactModel {
     required this.phone,
     required this.relationship,
     this.createdAt,
+    this.linkedUid,
   });
+
+  /// Si el contacto ya está vinculado a una cuenta de SafeWalk.
+  bool get isSafeWalkUser => linkedUid != null && linkedUid!.isNotEmpty;
 
   /// Crea el modelo a partir de un DocumentSnapshot de Firestore.
   factory EmergencyContactModel.fromDocument(DocumentSnapshot doc) {
@@ -25,6 +35,7 @@ class EmergencyContactModel {
       phone: data['phone'] ?? '',
       relationship: data['relationship'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      linkedUid: data['linkedUid'] as String?,
     );
   }
 
@@ -37,6 +48,7 @@ class EmergencyContactModel {
       createdAt: map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
           : null,
+      linkedUid: map['linkedUid'] as String?,
     );
   }
 
@@ -50,6 +62,7 @@ class EmergencyContactModel {
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),
+      'linkedUid': linkedUid,
     };
   }
 
@@ -60,6 +73,7 @@ class EmergencyContactModel {
       'phone': phone,
       'relationship': relationship,
       'createdAt': createdAt,
+      'linkedUid': linkedUid,
     };
   }
 
@@ -67,6 +81,7 @@ class EmergencyContactModel {
     String? name,
     String? phone,
     String? relationship,
+    String? linkedUid,
   }) {
     return EmergencyContactModel(
       id: id,
@@ -74,6 +89,7 @@ class EmergencyContactModel {
       phone: phone ?? this.phone,
       relationship: relationship ?? this.relationship,
       createdAt: createdAt,
+      linkedUid: linkedUid ?? this.linkedUid,
     );
   }
 }

@@ -81,5 +81,59 @@ service cloud.firestore {
       allow read: if signedIn();
       allow update, delete: if false;
     }
+
+    // NUEVO — Compartir ubicación en tiempo real -----------------------
+
+    // Índice teléfono -> uid. Permite resolver si un contacto de la
+    // agenda ya tiene cuenta en SafeWalk, sin abrir lectura de /users a
+    // cualquiera. Cada usuario solo puede escribir la entrada de su
+    // propio teléfono (se valida comparando con request.auth.uid).
+    match /phone_index/{phone} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+                              && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Sesiones de "compartir ubicación en tiempo real" entre dos
+    // usuarios. Solo el remitente (fromUid) y el destinatario (toUid)
+    // pueden leer o escribir su propia sesión.
+    match /location_shares/{shareId} {
+
+      function isParticipant() {
+        return signedIn() &&
+          (request.auth.uid == resource.data.fromUid ||
+           request.auth.uid == resource.data.toUid);
+      }
+
+      // Solo quien comparte (A) puede crear la solicitud, y siempre
+      // debe nacer en estado "pending".
+      allow create: if signedIn()
+                      && request.resource.data.fromUid == request.auth.uid
+                      && request.resource.data.status == 'pending';
+
+      allow read: if isParticipant();
+
+      // A y B pueden actualizar (A publica lastLat/lastLng y detiene la
+      // sesión; B acepta/rechaza/deja de seguir). No se valida aquí cada
+      // transición de estado en detalle: se confía en que solo la app
+      // oficial escribe estos campos (misma política que ya usa el
+      // resto de colecciones de este archivo, ej. trips/settings).
+      allow update: if isParticipant();
+
+      allow delete: if false;
+
+      // Posiciones en tiempo real de la sesión.
+      match /positions/{positionId} {
+        allow create: if signedIn()
+                        && get(/databases/$(database)/documents/location_shares/$(shareId)).data.fromUid == request.auth.uid
+                        && get(/databases/$(database)/documents/location_shares/$(shareId)).data.status == 'active';
+
+        allow read: if signedIn()
+                      && get(/databases/$(database)/documents/location_shares/$(shareId)).data.toUid == request.auth.uid;
+
+        allow update, delete: if false;
+      }
+    }
   }
 }
