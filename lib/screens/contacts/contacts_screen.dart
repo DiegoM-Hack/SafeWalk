@@ -127,16 +127,59 @@ class _ContactTile extends StatelessWidget {
           backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.12),
           child: Icon(Icons.person_outline, color: theme.colorScheme.primary),
         ),
-        title: Text(
-          contact.name,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                contact.name,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (contact.isLinkedToSafeWalk) ...[
+              const SizedBox(width: 8),
+              Tooltip(
+                message: 'Este contacto tiene cuenta en SafeWalk y '
+                    'recibirá alertas SOS automáticamente.',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.teal.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.verified,
+                        size: 13,
+                        color: AppColors.teal,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Vinculado',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: AppColors.teal,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         subtitle: Text(
-          '${contact.relationship} · ${contact.phone}',
+          '${contact.relationship} · ${contact.phone}\n${contact.email}',
           style: theme.textTheme.bodyMedium,
         ),
+        isThreeLine: true,
         trailing: PopupMenuButton<String>(
           icon: Icon(Icons.more_vert, color: theme.textTheme.bodyMedium?.color),
           onSelected: (value) {

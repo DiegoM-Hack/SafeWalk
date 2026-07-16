@@ -7,7 +7,6 @@ class ContactService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Referencia a la subcolección de contactos del usuario autenticado.
   /// users/{uid}/contacts
   CollectionReference<Map<String, dynamic>> get _contactsRef {
     final uid = _auth.currentUser?.uid;
@@ -16,29 +15,83 @@ class ContactService {
       throw Exception('No hay un usuario autenticado.');
     }
 
-    return _db.collection('users').doc(uid).collection('contacts');
+    return _db
+        .collection('users')
+        .doc(uid)
+        .collection('contacts');
   }
 
-  /// Stream en tiempo real de los contactos del usuario, ordenados
-  /// por fecha de creación descendente.
+  /// Obtiene todos los contactos del usuario en tiempo real.
   Stream<List<EmergencyContactModel>> getContacts() {
     return _contactsRef
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => EmergencyContactModel.fromDocument(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => EmergencyContactModel.fromDocument(doc),
+              )
+              .toList(),
+        );
   }
 
+  /// Busca un usuario registrado en SafeWalk mediante su correo.
+  /// Devuelve el UID si existe, caso contrario null.
+  Future<String?> findUserByEmail(String email) async {
+    final query = await _db
+        .collection('users')
+        .where('email', isEqualTo: email.trim().toLowerCase())
+        .limit(1)
+        .get();
+
+    if (query.docs.isEmpty) {
+      return null;
+    }
+
+    return query.docs.first.id;
+  }
+
+  /// Agrega un contacto.
+  /// Si el correo pertenece a un usuario registrado,
+  /// se guarda automáticamente el linkedUid.
   Future<void> addContact(EmergencyContactModel contact) async {
-    await _contactsRef.add(contact.toFirestore());
+    final linkedUid = await findUserByEmail(contact.email);
+
+    final newContact = contact.copyWith(
+      linkedUid: linkedUid,
+    );
+
+    await _contactsRef.add(newContact.toFirestore());
   }
 
+  /// Actualiza un contacto.
+  /// Si cambia el correo también se vuelve a verificar
+  /// si pertenece a un usuario registrado.
   Future<void> updateContact(EmergencyContactModel contact) async {
-    await _contactsRef.doc(contact.id).update(contact.toFirestore());
+    final linkedUid = await findUserByEmail(contact.email);
+
+    final updatedContact = contact.copyWith(
+      linkedUid: linkedUid,
+    );
+
+    await _contactsRef
+        .doc(contact.id)
+        .update(updatedContact.toFirestore());
   }
 
+  /// Elimina un contacto.
   Future<void> deleteContact(String contactId) async {
     await _contactsRef.doc(contactId).delete();
+  }
+
+  /// Devuelve únicamente los contactos que tienen cuenta
+  /// en SafeWalk (linkedUid != null).
+  Future<List<EmergencyContactModel>> getLinkedContacts() async {
+    final snapshot = await _contactsRef.get();
+
+    return snapshot.docs
+        .map((doc) => EmergencyContactModel.fromDocument(doc))
+        .where((contact) => contact.linkedUid != null)
+        .toList();
   }
 }
