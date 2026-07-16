@@ -46,6 +46,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       final hourStr =
                           '${trip.startTime.hour.toString().padLeft(2, '0')}:${trip.startTime.minute.toString().padLeft(2, '0')}';
 
+                      // Texto de origen -> destino, con fallback por si
+                      // algún recorrido viejo no tiene estos campos guardados.
+                      final hasRoute =
+                          trip.originAddress.isNotEmpty &&
+                          trip.destinationAddress.isNotEmpty;
+                      final routeStr = hasRoute
+                          ? '${trip.originAddress} → ${trip.destinationAddress}'
+                          : 'Recorrido sin direcciones registradas';
+
                       return Card(
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -72,11 +81,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Recorrido del $dateStr',
+                                      routeStr,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                       style: theme.textTheme.bodyLarge
                                           ?.copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Recorrido del $dateStr',
+                                      style: theme.textTheme.bodyMedium,
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
