@@ -4,6 +4,7 @@ class EmergencyContactModel {
   final String id;
   final String name;
   final String phone;
+  final String email;
   final String relationship;
   final DateTime? createdAt;
   // NUEVO: uid del usuario de SafeWalk al que corresponde este contacto,
@@ -17,6 +18,7 @@ class EmergencyContactModel {
     required this.id,
     required this.name,
     required this.phone,
+    required this.email,
     required this.relationship,
     this.createdAt,
     this.linkedUid,
@@ -33,6 +35,7 @@ class EmergencyContactModel {
       id: doc.id,
       name: data['name'] ?? '',
       phone: data['phone'] ?? '',
+      email: data['email'] ?? '',
       relationship: data['relationship'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       linkedUid: data['linkedUid'] as String?,
@@ -44,6 +47,7 @@ class EmergencyContactModel {
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       phone: map['phone'] ?? '',
+      email: map['email'] ?? '',
       relationship: map['relationship'] ?? '',
       createdAt: map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
@@ -58,6 +62,7 @@ class EmergencyContactModel {
     return {
       'name': name,
       'phone': phone,
+      'email': email,
       'relationship': relationship,
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
@@ -71,6 +76,7 @@ class EmergencyContactModel {
       'id': id,
       'name': name,
       'phone': phone,
+      'email': email,
       'relationship': relationship,
       'createdAt': createdAt,
       'linkedUid': linkedUid,
@@ -80,6 +86,7 @@ class EmergencyContactModel {
   EmergencyContactModel copyWith({
     String? name,
     String? phone,
+    String? email,
     String? relationship,
     String? linkedUid,
   }) {
@@ -87,6 +94,7 @@ class EmergencyContactModel {
       id: id,
       name: name ?? this.name,
       phone: phone ?? this.phone,
+      email: email ?? this.email,
       relationship: relationship ?? this.relationship,
       createdAt: createdAt,
       linkedUid: linkedUid ?? this.linkedUid,

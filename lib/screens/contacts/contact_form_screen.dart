@@ -19,6 +19,7 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
   late final TextEditingController _relationshipController;
 
   bool _isSaving = false;
@@ -28,6 +29,7 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.contact?.name);
     _phoneController = TextEditingController(text: widget.contact?.phone);
+    _emailController = TextEditingController(text: widget.contact?.email);
     _relationshipController = TextEditingController(
       text: widget.contact?.relationship,
     );
@@ -37,6 +39,7 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     _relationshipController.dispose();
     super.dispose();
   }
@@ -52,6 +55,7 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
       final updated = widget.contact!.copyWith(
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
+        email: _emailController.text.trim(),
         relationship: _relationshipController.text.trim(),
       );
       success = await provider.updateContact(updated);
@@ -59,6 +63,7 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
       success = await provider.addContact(
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
+        email: _emailController.text.trim(),
         relationship: _relationshipController.text.trim(),
       );
     }
@@ -164,6 +169,27 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                         }
                         if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
                           return 'El teléfono debe tener 10 dígitos.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Correo electrónico',
+                        hintText: 'Ej: juan@ejemplo.com',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'El correo es obligatorio.';
+                        }
+                        if (!RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        ).hasMatch(value.trim())) {
+                          return 'Ingresa un correo válido.';
                         }
                         return null;
                       },

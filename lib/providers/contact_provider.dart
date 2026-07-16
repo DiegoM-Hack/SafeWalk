@@ -53,6 +53,7 @@ class ContactProvider extends ChangeNotifier {
   Future<bool> addContact({
     required String name,
     required String phone,
+    required String email,
     required String relationship,
   }) async {
     try {
@@ -60,6 +61,7 @@ class ContactProvider extends ChangeNotifier {
         id: '',
         name: name,
         phone: phone,
+        email: email,
         relationship: relationship,
         createdAt: DateTime.now(),
       );
