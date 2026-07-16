@@ -64,15 +64,28 @@ class SOSProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> finishSOS() async {
-    if (_currentAlertId == null) return;
+  Future<bool> finishSOS() async {
+    if (_currentAlertId == null) return true;
 
-    await _sosService.finishAlert(_currentAlertId!);
+    try {
+      await _sosService.finishAlert(_currentAlertId!);
 
-    _currentAlertId = null;
-    _isEmergencyActive = false;
+      _currentAlertId = null;
+      _isEmergencyActive = false;
+      _errorMessage = null;
 
-    notifyListeners();
+      notifyListeners();
+      return true;
+    } catch (e, stackTrace) {
+      debugPrint("========== ERROR AL FINALIZAR SOS ==========");
+      debugPrint(e.toString());
+      debugPrintStack(stackTrace: stackTrace);
+      debugPrint("=============================================");
+
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   void clearError() {
