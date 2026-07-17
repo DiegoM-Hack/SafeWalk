@@ -241,9 +241,10 @@ y configurar:
 
 ---
 
-# 👥 Link de social
+# 👥 Link de social y vide de funcionamiento
 
-https://vt.tiktok.com/ZSX5j9Jc4/ 
+| https://vt.tiktok.com/ZSX5j9Jc4 |
+| https://vt.tiktok.com/ZSX5fP4nD |
 
 **Escuela Politécnica Nacional**
 **ESFOT**
