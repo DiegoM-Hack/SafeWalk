@@ -148,12 +148,7 @@ class AuthProvider extends ChangeNotifier {
 
       final uid = _authService.currentUser!.uid;
 
-      final token = await NotificationService.instance.getToken();
-
-      await _userService.updateFCMToken(
-        uid: uid,
-        token: token,
-      );
+      
 
       if (!exists) {
         final user = UserModel(
@@ -175,6 +170,13 @@ class AuthProvider extends ChangeNotifier {
         _userModel =
             await _userService.getUser(firebaseUser.uid);
       }
+
+      final token = await NotificationService.instance.getToken();
+
+      await _userService.updateFCMToken(
+        uid: uid,
+        token: token,
+      );
 
       _errorMessage = null;
 
