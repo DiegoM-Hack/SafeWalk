@@ -241,9 +241,9 @@ y configurar:
 
 ---
 
-# 👥 Equipo de desarrollo
+# 👥 Link de social
 
-Proyecto desarrollado por estudiantes de la
+https://vt.tiktok.com/ZSX5j9Jc4/ 
 
 **Escuela Politécnica Nacional**
 **ESFOT**
