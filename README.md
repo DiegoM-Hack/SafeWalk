@@ -48,7 +48,6 @@ Desarrollar una aplicación móvil que permita a los usuarios desplazarse de for
 - ✅ Historial de recorridos
 - ✅ Botón SOS
 - ✅ Compartición de ubicación
-- 🔄 Integración con Firebase Cloud Messaging (en desarrollo)
 
 ---
 
