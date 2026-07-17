@@ -3,14 +3,22 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="safewalk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
+        <!-- Canal de notificaciones flotantes con alta prioridad -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBzFnpgn3JbQ-XVfJ7aEg8n1Pc_EVV8jec" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

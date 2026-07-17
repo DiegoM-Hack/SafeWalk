@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/sos_provider.dart';
@@ -14,48 +15,37 @@ import 'providers/app_notification_provider.dart';
 import 'providers/chat_provider.dart';
 import 'app.dart';
 
+// Controlador de notificaciones en segundo plano (App cerrada o minimizada)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Procesa las notificaciones cuando la app está en background
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Registrar el manejador de notificaciones en segundo plano
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await NotificationService.instance.initialize();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => SOSProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ContactProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => LocationProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => TripProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ProfileProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => HistoryProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => NotificationProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ChatProvider(),
-        ),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => SOSProvider()),
+        ChangeNotifierProvider(create: (_) => ContactProvider()),
+        ChangeNotifierProvider(create: (_) => LocationProvider()),
+        ChangeNotifierProvider(create: (_) => TripProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: const App(),
     ),
   );
 }
-

@@ -27,16 +27,16 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      uid: map["uid"],
-      name: map["name"],
-      email: map["email"],
-      phone: map["phone"],
+      uid: map["uid"] ?? '',
+      name: map["name"] ?? '',
+      email: map["email"] ?? '',
+      phone: map["phone"] ?? '',
       photoUrl: map["photoUrl"],
       fcmToken: map["fcmToken"],
-      provider: map["provider"],
-      isActive: map["isActive"],
-      createdAt: map["createdAt"],
-      updatedAt: map["updatedAt"],
+      provider: map["provider"] ?? '',
+      isActive: map["isActive"] ?? true,
+      createdAt: map["createdAt"] ?? Timestamp.now(),
+      updatedAt: map["updatedAt"] ?? Timestamp.now(),
     );
   }
 

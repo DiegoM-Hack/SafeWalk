@@ -2,40 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/sos_provider.dart';
 import '../../services/notification_service.dart';
-import '../../providers/contact_provider.dart';
-import '../../providers/chat_provider.dart';
+import '../../services/contact_service.dart'; // 👈 nuevo import, ajusta el path si hace falta
 import '../chat/chat_screen.dart';
 
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
 
-
   @override
   State<SOSScreen> createState() => _SOSScreenState();
 }
-//sosProvider
+
 class _SOSScreenState extends State<SOSScreen> {
-  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _alertSubscription; 
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+  _alertSubscription;
+
   @override
   void initState() {
-    super.initState();//disposes
-
+    super.initState();
     Future.microtask(() {
-      context.read<LocationProvider>().loadCurrentLocation();
+      if (mounted) {
+        context.read<LocationProvider>().loadCurrentLocation();
+      }
     });
   }
 
   @override
-   void dispose() {
-  _alertSubscription?.cancel();
-  super.dispose();
-}
+  void dispose() {
+    _alertSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +49,7 @@ class _SOSScreenState extends State<SOSScreen> {
     final position = locationProvider.currentPosition;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("SafeWalk"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("SafeWalk"), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -61,35 +60,23 @@ class _SOSScreenState extends State<SOSScreen> {
               color: Colors.red,
               size: 100,
             ),
-
             const SizedBox(height: 20),
-
             const Text(
               "EMERGENCIA",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 10),
-
             const Text(
               "Si te encuentras en una situación de riesgo, presiona el botón para enviar una alerta.",
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 30),
-
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.location_on,
-                      color: AppColors.danger,
-                    ),
+                    const Icon(Icons.location_on, color: AppColors.danger),
                     const SizedBox(width: 12),
                     Expanded(
                       child: position == null
@@ -120,12 +107,9 @@ class _SOSScreenState extends State<SOSScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 40),
-
             if (sosProvider.isLoading)
               const CircularProgressIndicator()
-
             else if (!sosProvider.isEmergencyActive)
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -140,9 +124,7 @@ class _SOSScreenState extends State<SOSScreen> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Text("Confirmar"),
-                      content: const Text(
-                        "¿Deseas enviar una alerta SOS?",
-                      ),
+                      content: const Text("¿Deseas enviar una alerta SOS?"),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -157,21 +139,21 @@ class _SOSScreenState extends State<SOSScreen> {
                   );
 
                   if (confirmar != true) return;
-
                   if (position == null) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          "No se pudo obtener la ubicación.",
-                        ),
+                        content: Text("No se pudo obtener la ubicación."),
                       ),
                     );
                     return;
                   }
 
-                  final uid = authProvider.user?.uid;
+                  final firebaseUser = FirebaseAuth.instance.currentUser;
+                  final uid = authProvider.user?.uid ?? firebaseUser?.uid;
 
                   if (uid == null) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         backgroundColor: AppColors.danger,
@@ -186,33 +168,35 @@ class _SOSScreenState extends State<SOSScreen> {
                     latitude: position.latitude,
                     longitude: position.longitude,
                     message: "Necesito ayuda",
+                    // usamos el nombre guardado en Firestore (UserModel), no el de FirebaseAuth
+                    userName:
+                        authProvider.user?.name ??
+                        firebaseUser?.email ??
+                        "Contacto de Emergencia",
+                    userPhoto: authProvider.user?.photoUrl ?? "",
                   );
 
                   if (!mounted) return;
 
                   if (ok) {
-
                     final alertId = sosProvider.currentAlertId!;
 
-                    final contactProvider = context.read<ContactProvider>();
+                    // traemos los contactos vinculados frescos, sin depender del caché del provider
+                    final contactService = ContactService();
+                    final linkedContacts = await contactService
+                        .getLinkedContacts();
 
-                    debugPrint("========== CONTACTOS ==========");
-                    debugPrint("Total contactos: ${contactProvider.contacts.length}");
-                    debugPrint("Total vinculados: ${contactProvider.linkedContactsCount}");
+                    debugPrint(
+                      "Contactos vinculados encontrados: ${linkedContacts.length}",
+                    );
 
-                    for(final contact in contactProvider.contacts){
-
-                      if(contact.linkedUid == null) continue;
-
-                      debugPrint("Contacto: ${contact.name}");
-                      debugPrint("linkedUid: ${contact.linkedUid}");
-
+                    for (final contact in linkedContacts) {
+                      if (contact.linkedUid == null) continue;
                       await NotificationService.instance.sendNotification(
                         receiverUid: contact.linkedUid!,
                         senderUid: uid,
                         alertId: alertId,
                       );
-                      debugPrint("Notificación enviada");
                     }
 
                     locationProvider.startTracking(
@@ -225,52 +209,32 @@ class _SOSScreenState extends State<SOSScreen> {
                     );
 
                     _alertSubscription?.cancel();
-
-                    _alertSubscription = context
-                        .read<SOSProvider>()
+                    _alertSubscription = sosProvider
                         .listenAlert(alertId)
                         .listen((doc) {
+                          if (!doc.exists) return;
+                          final data = doc.data();
+                          if (data == null || data["status"] != "accepted")
+                            return;
 
-                      if (!doc.exists) return;
+                          _alertSubscription?.cancel();
+                          if (!mounted) return;
 
-                      final data = doc.data()!;
-
-                      debugPrint("Estado alerta: ${data["status"]}");
-
-                      if (data["status"] != "accepted") return;
-
-                      _alertSubscription?.cancel();
-
-                      if (!mounted) return;
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            alertId: alertId,
-                            uid: uid,
-                          ),
-                        ),
-                      );
-                    });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ChatScreen(alertId: alertId, uid: uid),
+                            ),
+                          );
+                        });
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      backgroundColor:
-                          ok ? AppColors.success : AppColors.danger,
-                      content: Text(
-                        ok
-                            ? "Alerta enviada correctamente"
-                            : sosProvider.errorMessage ?? "Error",
-                      ),
-                    ),
-                  );
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor:
-                          ok ? AppColors.success : AppColors.danger,
+                      backgroundColor: ok
+                          ? AppColors.success
+                          : AppColors.danger,
                       content: Text(
                         ok
                             ? "Alerta enviada correctamente"
@@ -280,7 +244,6 @@ class _SOSScreenState extends State<SOSScreen> {
                   );
                 },
               )
-
             else
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -292,17 +255,10 @@ class _SOSScreenState extends State<SOSScreen> {
                 label: const Text("FINALIZAR SOS"),
                 onPressed: () async {
                   locationProvider.stopTracking();
-
                   await sosProvider.finishSOS();
-
                   if (!mounted) return;
-
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Emergencia finalizada.",
-                      ),
-                    ),
+                    const SnackBar(content: Text("Emergencia finalizada.")),
                   );
                 },
               ),

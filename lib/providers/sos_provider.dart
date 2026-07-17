@@ -14,13 +14,9 @@ class SOSProvider extends ChangeNotifier {
   bool _isEmergencyActive = false;
 
   bool get isLoading => _isLoading;
-
   bool get isEmergencyActive => _isEmergencyActive;
-
   bool get hasActiveSOS => _currentAlertId != null;
-
   String? get currentAlertId => _currentAlertId;
-
   String? get errorMessage => _errorMessage;
 
   Future<bool> sendSOS({
@@ -28,6 +24,8 @@ class SOSProvider extends ChangeNotifier {
     required double latitude,
     required double longitude,
     required String message,
+    String? userName,
+    String? userPhoto,
   }) async {
     _setLoading(true);
 
@@ -37,6 +35,8 @@ class SOSProvider extends ChangeNotifier {
         latitude: latitude,
         longitude: longitude,
         message: message,
+        userName: userName,
+        userPhoto: userPhoto,
       );
 
       _isEmergencyActive = true;
@@ -130,14 +130,13 @@ class SOSProvider extends ChangeNotifier {
     }
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> listenAlert(
-    String alertId) {
-  return _sosService.listenAlert(alertId);
-}
+  Stream<DocumentSnapshot<Map<String, dynamic>>> listenAlert(String alertId) {
+    return _sosService.listenAlert(alertId);
+  }
 
-Future<void> acceptAlert(String alertId) async {
-  await _sosService.acceptAlert(alertId);
-}
+  Future<void> acceptAlert(String alertId) async {
+    await _sosService.acceptAlert(alertId);
+  }
 
   void clearError() {
     _errorMessage = null;

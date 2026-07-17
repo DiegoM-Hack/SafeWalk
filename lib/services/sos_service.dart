@@ -16,9 +16,13 @@ class SOSService {
     required double latitude,
     required double longitude,
     required String message,
+    String? userName,
+    String? userPhoto,
   }) async {
     final doc = await _firestore.collection(collection).add({
       'userId': userId,
+      'userName': userName ?? 'Usuario en emergencia',
+      'userPhoto': userPhoto ?? '',
       'latitude': latitude,
       'longitude': longitude,
       'message': message,
@@ -66,25 +70,19 @@ class SOSService {
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getAlert(
-      String alertId) async {
+    String alertId,
+  ) async {
     return await _firestore.collection(collection).doc(alertId).get();
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> listenAlert(
-    String alertId) {
-  return _firestore
-      .collection("emergency_alerts")
-      .doc(alertId)
-      .snapshots();
-}
+  Stream<DocumentSnapshot<Map<String, dynamic>>> listenAlert(String alertId) {
+    return _firestore.collection("emergency_alerts").doc(alertId).snapshots();
+  }
 
-Future<void> acceptAlert(String alertId) async {
-  await _firestore
-      .collection("emergency_alerts")
-      .doc(alertId)
-      .update({
-    "status": accepted,
-    "acceptedAt": FieldValue.serverTimestamp(),
-  });
-}
+  Future<void> acceptAlert(String alertId) async {
+    await _firestore.collection("emergency_alerts").doc(alertId).update({
+      "status": accepted,
+      "acceptedAt": FieldValue.serverTimestamp(),
+    });
+  }
 }
