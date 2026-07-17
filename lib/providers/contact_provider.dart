@@ -38,15 +38,9 @@ class ContactProvider extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-<<<<<<< HEAD
   bool isLinking(String contactId) => _linkingContactIds.contains(contactId);
 
-  /// Se llama una vez el usuario está autenticado (por ejemplo, desde
-  /// el HomeScreen o justo después del login) para empezar a escuchar
-  /// los contactos en tiempo real.
-=======
   /// Comienza a escuchar los contactos en tiempo real.
->>>>>>> main
   void listenToContacts() {
     _setLoading(true);
 

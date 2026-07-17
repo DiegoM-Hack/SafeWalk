@@ -177,7 +177,6 @@ class _ContactTile extends StatelessWidget {
           ],
         ),
         subtitle: Text(
-<<<<<<< HEAD
           contact.isSafeWalkUser
               ? '${contact.relationship} · ${contact.phone} · en SafeWalk'
               : '${contact.relationship} · ${contact.phone}',
@@ -220,28 +219,6 @@ class _ContactTile extends StatelessWidget {
                 const PopupMenuItem(value: 'delete', child: Text('Eliminar')),
               ],
             ),
-=======
-          '${contact.relationship} · ${contact.phone}\n${contact.email}',
-          style: theme.textTheme.bodyMedium,
-        ),
-        isThreeLine: true,
-        trailing: PopupMenuButton<String>(
-          icon: Icon(Icons.more_vert, color: theme.textTheme.bodyMedium?.color),
-          onSelected: (value) {
-            if (value == 'edit') {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => ContactFormScreen(contact: contact),
-                ),
-              );
-            } else if (value == 'delete') {
-              _confirmDelete(context, contact);
-            }
-          },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'edit', child: Text('Editar')),
-            PopupMenuItem(value: 'delete', child: Text('Eliminar')),
->>>>>>> main
           ],
         ),
       ),

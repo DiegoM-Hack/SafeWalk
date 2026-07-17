@@ -36,17 +36,15 @@ class ContactService {
   }
 
   Future<void> addContact(EmergencyContactModel contact) async {
-    final linkedUid = await findUserByEmail(contact.email);
-
-    final newContact = contact.copyWith(
-      linkedUid: linkedUid,
-    );
-
-    await _contactsRef.add(newContact.toFirestore());
+    await _contactsRef.add(contact.toFirestore());
   }
 
   Future<void> updateContact(EmergencyContactModel contact) async {
     await _contactsRef.doc(contact.id).update(contact.toFirestore());
+  }
+
+  Future<void> setLinkedUid(String contactId, String? linkedUid) async {
+    await _contactsRef.doc(contactId).update({'linkedUid': linkedUid});
   }
 
   /// Elimina un contacto.
