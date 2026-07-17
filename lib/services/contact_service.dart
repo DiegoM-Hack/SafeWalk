@@ -7,7 +7,6 @@ class ContactService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Referencia a la subcolección de contactos del usuario autenticado.
   /// users/{uid}/contacts
   CollectionReference<Map<String, dynamic>> get _contactsRef {
     final uid = _auth.currentUser?.uid;
@@ -16,18 +15,24 @@ class ContactService {
       throw Exception('No hay un usuario autenticado.');
     }
 
-    return _db.collection('users').doc(uid).collection('contacts');
+    return _db
+        .collection('users')
+        .doc(uid)
+        .collection('contacts');
   }
 
-  /// Stream en tiempo real de los contactos del usuario, ordenados
-  /// por fecha de creación descendente.
+  /// Obtiene todos los contactos del usuario en tiempo real.
   Stream<List<EmergencyContactModel>> getContacts() {
     return _contactsRef
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => EmergencyContactModel.fromDocument(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => EmergencyContactModel.fromDocument(doc),
+              )
+              .toList(),
+        );
   }
 
   Future<void> addContact(EmergencyContactModel contact) async {
@@ -38,6 +43,11 @@ class ContactService {
     await _contactsRef.doc(contact.id).update(contact.toFirestore());
   }
 
+  Future<void> setLinkedUid(String contactId, String? linkedUid) async {
+    await _contactsRef.doc(contactId).update({'linkedUid': linkedUid});
+  }
+
+  /// Elimina un contacto.
   Future<void> deleteContact(String contactId) async {
     await _contactsRef.doc(contactId).delete();
   }

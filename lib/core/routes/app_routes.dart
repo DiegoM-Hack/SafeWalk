@@ -9,6 +9,7 @@ import '../../screens/map/map_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/contacts/contacts_screen.dart';
 import '../../screens/splash/splash_screen.dart';
+import '../../screens/map/incoming_shares_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -21,6 +22,9 @@ class AppRoutes {
   static const String map = '/map';
   static const sos = '/sos';
   static const String history = '/history';
+  // NUEVO: lista de solicitudes pendientes + sesiones activas que otras
+  // personas están compartiendo conmigo.
+  static const String incomingShares = '/shared-with-me';
 
   static Map<String, WidgetBuilder> routes = {
     splash: (context) => const SplashScreen(),
@@ -33,5 +37,6 @@ class AppRoutes {
     map: (context) => const MapScreen(),
     history: (context) => const HistoryScreen(),
     sos: (context) => const SOSScreen(),
+    incomingShares: (context) => const IncomingSharesScreen(),
   };
 }

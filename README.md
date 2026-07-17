@@ -97,3 +97,156 @@ lib/
 │   └── sos/               # Pantalla de emergencia y alerta activa
 ├── services/              # Conectores externos (Firestore, Location, Directions API, Notifications)
 └── widgets/               # Componentes reutilizables de UI
+
+# 🔥 Base de datos
+
+## users
+
+Información de cada usuario.
+
+```
+users
+ └── uid
+      ├── name
+      ├── email
+      ├── phone
+      └── createdAt
+```
+
+---
+
+## contacts
+
+Contactos de emergencia.
+
+```
+users
+ └── uid
+      └── contacts
+```
+
+---
+
+## emergency_alerts
+
+Alertas enviadas.
+
+```
+emergency_alerts
+
+uid
+
+latitude
+
+longitude
+
+message
+
+status
+
+createdAt
+```
+
+---
+
+# 📍 Flujo de la aplicación
+
+```
+Usuario
+
+↓
+
+Inicio de sesión
+
+↓
+
+Pantalla principal
+
+↓
+
+Mapa
+│
+├── Contactos
+├── Historial
+├── Perfil
+└── SOS
+
+↓
+
+Ubicación GPS
+
+↓
+
+Firestore
+
+↓
+
+Registro de alerta
+```
+
+---
+
+# 🚀 Instalación
+
+## Clonar el proyecto
+
+```bash
+git clone https://github.com/DiegoM-Hack/SafeWalk.git
+```
+
+Entrar al proyecto
+
+```bash
+cd SafeWalk
+```
+
+Instalar dependencias
+
+```bash
+flutter pub get
+```
+
+Ejecutar
+
+```bash
+flutter run
+```
+
+Generar APK
+
+```bash
+flutter build apk --release
+```
+
+---
+
+# ⚙ Configuración
+
+El proyecto requiere una configuración previa de Firebase.
+
+Es necesario incluir:
+
+```
+android/app/google-services.json
+```
+
+y configurar:
+
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Messaging
+- Firebase Analytics
+- Firebase Crashlytics
+
+
+---
+
+# 👥 Equipo de desarrollo
+
+Proyecto desarrollado por estudiantes de la
+
+**Escuela Politécnica Nacional**
+**ESFOT**
+
+---
+

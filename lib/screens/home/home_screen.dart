@@ -7,6 +7,12 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/location_provider.dart';
 import '../../widgets/app_drawer.dart';
+import '../../providers/app_notification_provider.dart';
+import '../chat/chat_screen.dart';
+import '../../widgets/accept_sos_dialog.dart';
+import '../../providers/chat_provider.dart';
+import '../../providers/sos_provider.dart';
+import '../../providers/contact_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LocationProvider>().loadCurrentLocation();
+      context.read<ContactProvider>().listenToContacts();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    final uid = context.read<AuthProvider>().firebaseUser!.uid;
+    context
+        .read<NotificationProvider>()
+        .listenNotifications(uid);
+  }); 
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
@@ -62,11 +76,91 @@ class _HomeScreenState extends State<HomeScreen> {
     ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final locationProvider = context.watch<LocationProvider>();
-    final position = locationProvider.currentPosition ?? _fallback;
+@override
+Widget build(BuildContext context) {
+  final theme = Theme.of(context);
+  final locationProvider = context.watch<LocationProvider>();
+  final position = locationProvider.currentPosition ?? _fallback;
+
+  return Consumer<NotificationProvider>(
+    builder: (context, notificationProvider, child) {
+      debugPrint("hasPendingSOS: ${notificationProvider.hasPendingSOS}");
+      debugPrint("dialogShown: ${notificationProvider.dialogShown}");
+
+      if (notificationProvider.hasPendingSOS &&
+          !notificationProvider.dialogShown) {
+
+        notificationProvider.markDialogShown();
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => AcceptSOSDialog(
+
+              onReject: () async {
+
+                  Navigator.pop(context);
+
+                  final notificationProvider =
+                      context.read<NotificationProvider>();
+
+                  await notificationProvider.rejectNotification(
+                    notificationProvider.lastNotificationId!,
+                  );
+
+                  notificationProvider.clearDialog();
+                },
+
+              onAccept: () async {
+
+                      Navigator.pop(context);
+
+                      final authProvider = context.read<AuthProvider>();
+                      final chatProvider = context.read<ChatProvider>();
+                      final notificationProvider =
+                          context.read<NotificationProvider>();
+
+                      final uid = authProvider.firebaseUser!.uid;
+                      debugPrint("Mi UID: $uid");
+
+                      final alertId = notificationProvider.currentAlertId!;
+
+                      await notificationProvider.markAsRead(
+                        notificationProvider.lastNotificationId!,
+                      );
+
+                      notificationProvider.clearDialog();
+
+                      await context
+                        .read<SOSProvider>()
+                        .acceptAlert(alertId);
+
+                      await chatProvider.sendSystemMessage(
+                        alertId: alertId,
+                        text:
+                            "${authProvider.user?.name ?? "Un contacto"} aceptó ayudar.",
+                      );
+
+                      if (!context.mounted) return;
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            alertId: alertId,
+                            uid: uid,
+                          ),
+                        ),
+                      );
+                    },
+            ),
+          );
+        });
+      }
+
+          
 
     return Scaffold(
       appBar: AppBar(
@@ -309,7 +403,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  );
 }
+}
+
 
 /// Tarjeta pequeña de acceso rápido, usada en la fila debajo del mapa.
 /// Cada acceso tiene su propio color de acento para romper el monocromismo
@@ -371,7 +468,7 @@ class _QuickAction extends StatelessWidget {
       ),
     );
   }
-}
+}  //initState
 
 /// Modelo simple para un consejo de seguridad.
 class _SafetyTip {

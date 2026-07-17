@@ -1,27 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/location_provider.dart';
 import '../../providers/sos_provider.dart';
+import '../../services/notification_service.dart';
+import '../../providers/contact_provider.dart';
+import '../../providers/chat_provider.dart';
+import '../chat/chat_screen.dart';
 
 class SOSScreen extends StatefulWidget {
   const SOSScreen({super.key});
 
+
   @override
   State<SOSScreen> createState() => _SOSScreenState();
 }
-
+//sosProvider
 class _SOSScreenState extends State<SOSScreen> {
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _alertSubscription; 
   @override
   void initState() {
-    super.initState();
+    super.initState();//disposes
 
     Future.microtask(() {
       context.read<LocationProvider>().loadCurrentLocation();
     });
   }
+
+  @override
+   void dispose() {
+  _alertSubscription?.cancel();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +191,30 @@ class _SOSScreenState extends State<SOSScreen> {
                   if (!mounted) return;
 
                   if (ok) {
+
+                    final alertId = sosProvider.currentAlertId!;
+
+                    final contactProvider = context.read<ContactProvider>();
+
+                    debugPrint("========== CONTACTOS ==========");
+                    debugPrint("Total contactos: ${contactProvider.contacts.length}");
+                    debugPrint("Total vinculados: ${contactProvider.linkedContactsCount}");
+
+                    for(final contact in contactProvider.contacts){
+
+                      if(contact.linkedUid == null) continue;
+
+                      debugPrint("Contacto: ${contact.name}");
+                      debugPrint("linkedUid: ${contact.linkedUid}");
+
+                      await NotificationService.instance.sendNotification(
+                        receiverUid: contact.linkedUid!,
+                        senderUid: uid,
+                        alertId: alertId,
+                      );
+                      debugPrint("Notificación enviada");
+                    }
+
                     locationProvider.startTracking(
                       onPositionUpdate: (newPosition) async {
                         await sosProvider.updateLocation(
@@ -185,7 +223,49 @@ class _SOSScreenState extends State<SOSScreen> {
                         );
                       },
                     );
+
+                    _alertSubscription?.cancel();
+
+                    _alertSubscription = context
+                        .read<SOSProvider>()
+                        .listenAlert(alertId)
+                        .listen((doc) {
+
+                      if (!doc.exists) return;
+
+                      final data = doc.data()!;
+
+                      debugPrint("Estado alerta: ${data["status"]}");
+
+                      if (data["status"] != "accepted") return;
+
+                      _alertSubscription?.cancel();
+
+                      if (!mounted) return;
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            alertId: alertId,
+                            uid: uid,
+                          ),
+                        ),
+                      );
+                    });
                   }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor:
+                          ok ? AppColors.success : AppColors.danger,
+                      content: Text(
+                        ok
+                            ? "Alerta enviada correctamente"
+                            : sosProvider.errorMessage ?? "Error",
+                      ),
+                    ),
+                  );
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -213,14 +293,19 @@ class _SOSScreenState extends State<SOSScreen> {
                 onPressed: () async {
                   locationProvider.stopTracking();
 
-                  await sosProvider.finishSOS();
+                  final ok = await sosProvider.finishSOS();
 
                   if (!mounted) return;
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
+                      backgroundColor:
+                          ok ? AppColors.success : AppColors.danger,
                       content: Text(
-                        "Emergencia finalizada.",
+                        ok
+                            ? "Emergencia finalizada."
+                            : sosProvider.errorMessage ??
+                                "No se pudo finalizar la emergencia.",
                       ),
                     ),
                   );
