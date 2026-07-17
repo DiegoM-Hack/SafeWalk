@@ -36,17 +36,6 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-<<<<<<< HEAD
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => SOSProvider()),
-        ChangeNotifierProvider(create: (_) => ContactProvider()),
-        ChangeNotifierProvider(create: (_) => LocationProvider()),
-        ChangeNotifierProvider(create: (_) => TripProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => HistoryProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
-=======
         ChangeNotifierProvider(
           create: (_) => AuthProvider(),
         ),
@@ -68,18 +57,12 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => HistoryProvider(),
         ),
-        // NUEVO: estado del flujo "Compartir ubicación en tiempo real"
-        // (solicitudes pendientes, sesiones activas, tracking propio).
-        ChangeNotifierProvider(
-          create: (_) => LocationShareProvider()
-          ),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => ChatProvider(),
         ),
->>>>>>> b7b26ef65e4fd123a52165e174304e319f87b7d3
       ],
       child: const App(),
     ),
