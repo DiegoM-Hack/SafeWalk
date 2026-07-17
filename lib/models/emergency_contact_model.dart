@@ -6,13 +6,18 @@ class EmergencyContactModel {
   final String phone;
   final String email;
   final String relationship;
+  final String? linkedUid;
   final DateTime? createdAt;
+<<<<<<< HEAD
   // NUEVO: uid del usuario de SafeWalk al que corresponde este contacto,
   // si es que este contacto también tiene cuenta en la app (se resuelve
   // buscando su teléfono en el índice de usuarios). Si es null, el
   // contacto es solo información de agenda y no se le puede enviar una
   // solicitud de "compartir ubicación en tiempo real".
   final String? linkedUid;
+=======
+  bool get isLinkedToSafeWalk => linkedUid != null;
+>>>>>>> main
 
   EmergencyContactModel({
     required this.id,
@@ -20,6 +25,7 @@ class EmergencyContactModel {
     required this.phone,
     required this.email,
     required this.relationship,
+    this.linkedUid,
     this.createdAt,
     this.linkedUid,
   });
@@ -29,7 +35,7 @@ class EmergencyContactModel {
 
   /// Crea el modelo a partir de un DocumentSnapshot de Firestore.
   factory EmergencyContactModel.fromDocument(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
 
     return EmergencyContactModel(
       id: doc.id,
@@ -37,6 +43,7 @@ class EmergencyContactModel {
       phone: data['phone'] ?? '',
       email: data['email'] ?? '',
       relationship: data['relationship'] ?? '',
+      linkedUid: data['linkedUid'] as String?,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       linkedUid: data['linkedUid'] as String?,
     );
@@ -49,6 +56,7 @@ class EmergencyContactModel {
       phone: map['phone'] ?? '',
       email: map['email'] ?? '',
       relationship: map['relationship'] ?? '',
+      linkedUid: map['linkedUid'] as String?,
       createdAt: map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
           : null,
@@ -64,6 +72,7 @@ class EmergencyContactModel {
       'phone': phone,
       'email': email,
       'relationship': relationship,
+      'linkedUid': linkedUid,
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),
@@ -78,6 +87,7 @@ class EmergencyContactModel {
       'phone': phone,
       'email': email,
       'relationship': relationship,
+      'linkedUid': linkedUid,
       'createdAt': createdAt,
       'linkedUid': linkedUid,
     };
@@ -96,6 +106,7 @@ class EmergencyContactModel {
       phone: phone ?? this.phone,
       email: email ?? this.email,
       relationship: relationship ?? this.relationship,
+      linkedUid: linkedUid ?? this.linkedUid,
       createdAt: createdAt,
       linkedUid: linkedUid ?? this.linkedUid,
     );
