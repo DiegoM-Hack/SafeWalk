@@ -6,7 +6,7 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/user_service.dart';
-import '../services/notification_service.dart';
+
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -14,7 +14,8 @@ class AuthProvider extends ChangeNotifier {
   // NUEVO: se usa para guardar el token FCM del usuario apenas inicia
   // sesión, requisito para poder enviarle notificaciones push (por
   // ejemplo, solicitudes de "compartir ubicación en tiempo real").
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService =
+    NotificationService.instance;
 
   User? _firebaseUser;
   UserModel? _userModel;
@@ -72,7 +73,7 @@ class AuthProvider extends ChangeNotifier {
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: uid,
         token: token,
       );
@@ -125,7 +126,7 @@ class AuthProvider extends ChangeNotifier {
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: firebaseUser.uid,
         token: token,
       );
@@ -184,7 +185,7 @@ class AuthProvider extends ChangeNotifier {
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: uid,
         token: token,
       );

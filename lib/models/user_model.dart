@@ -15,7 +15,7 @@ class UserModel {
   // enviarle una notificación push (por ejemplo, una solicitud de
   // "compartir ubicación en tiempo real"). Puede ser null si el usuario
   // nunca dio permiso de notificaciones o aún no se ha sincronizado.
-  final String? fcmToken;
+
 
   UserModel({
     required this.uid,
@@ -28,7 +28,7 @@ class UserModel {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
-    this.fcmToken,
+    
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -43,7 +43,7 @@ class UserModel {
       isActive: map["isActive"],
       createdAt: map["createdAt"],
       updatedAt: map["updatedAt"],
-      fcmToken: map["fcmToken"],
+    
     );
   }
 
