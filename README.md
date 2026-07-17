@@ -1,95 +1,245 @@
 # 🛡️ SafeWalk
 
-SafeWalk es una aplicación móvil desarrollada en Flutter que busca mejorar la seguridad de las personas al desplazarse por la ciudad. 
-La aplicación permite compartir la ubicación en tiempo real, gestionar contactos de emergencia y enviar alertas SOS cuando el usuario se encuentre en una situación de riesgo.
+<div align="center">
+
+Aplicación móvil desarrollada con Flutter para mejorar la seguridad de las personas mediante el seguimiento de ubicación, rutas seguras y un sistema de alertas SOS.
+
+</div>
 
 ---
 
-## 📱 Características
+# 📖 Descripción
 
-- Registro e inicio de sesión mediante Firebase Authentication.
-- Gestión de contactos de emergencia.
-- Visualización de ubicación mediante Google Maps.
-- Seguimiento de ubicación en tiempo real.
-- Historial de recorridos.
-- Perfil de usuario.
-- Botón SOS con envío de alerta.
-- Almacenamiento de información en Cloud Firestore.
+SafeWalk es una aplicación móvil orientada a la seguridad personal durante desplazamientos.
+
+Su objetivo es permitir que los usuarios compartan su ubicación con personas de confianza y puedan solicitar ayuda rápidamente mediante un botón de emergencia (SOS).
+
+La aplicación integra servicios de Firebase para autenticación, almacenamiento de información y gestión de alertas, además de Google Maps para mostrar la ubicación en tiempo real.
 
 ---
 
-## 🚨 Funcionalidad SOS
+# 🎯 Objetivos
 
-Cuando el usuario presiona el botón **SOS**, la aplicación realiza las siguientes acciones:
+## Objetivo General
 
-1. Solicita confirmación antes de enviar la alerta.
-2. Obtiene la ubicación GPS actual del dispositivo.
-3. Crea una alerta en Cloud Firestore.
-4. Guarda:
+Desarrollar una aplicación móvil que permita a los usuarios desplazarse de forma más segura mediante herramientas de seguimiento y respuesta ante emergencias.
+
+## Objetivos Específicos
+
+- Registrar e iniciar sesión de usuarios.
+- Gestionar contactos de emergencia.
+- Visualizar mapas y rutas.
+- Compartir la ubicación.
+- Enviar alertas SOS.
+- Mantener un historial de recorridos.
+- Administrar el perfil del usuario.
+
+---
+
+# ✨ Funcionalidades
+
+- ✅ Registro de usuarios
+- ✅ Inicio de sesión
+- ✅ Recuperación de contraseña
+- ✅ Perfil de usuario
+- ✅ Gestión de contactos de emergencia
+- ✅ Visualización de mapas
+- ✅ Seguimiento GPS
+- ✅ Historial de recorridos
+- ✅ Botón SOS
+- ✅ Compartición de ubicación
+- 🔄 Integración con Firebase Cloud Messaging (en desarrollo)
+
+---
+
+# 🚨 Funcionamiento del botón SOS
+
+Cuando el usuario presiona el botón de emergencia:
+
+1. Se solicita confirmación.
+2. Se obtiene la ubicación actual del dispositivo.
+3. Se verifica que exista un usuario autenticado.
+4. Se registra una alerta en Cloud Firestore.
+5. Se almacena:
    - UID del usuario
    - Latitud
    - Longitud
-   - Mensaje de emergencia
-   - Estado de la alerta
-   - Fecha y hora de creación
-5. Mientras la emergencia permanezca activa, la ubicación se actualiza automáticamente.
-6. El usuario puede finalizar la emergencia cuando ya no necesite ayuda.
+   - Mensaje
+   - Estado
+   - Fecha y hora
+6. Se notifica al usuario si el envío fue exitoso.
+
 
 ---
 
-## 🛠 Tecnologías utilizadas
+# 🏗 Arquitectura
 
-- Flutter
-- Dart
-- Firebase Authentication
-- Cloud Firestore
-- Firebase Cloud Messaging (FCM)
-- Google Maps Flutter
-- Geolocator
-- Provider
+```
+Flutter
+│
+├── Core
+│     ├── Routes
+│     └── Theme
+│
+├── Models
+│
+├── Providers
+│
+├── Services
+│
+├── Screens
+│     ├── Auth
+│     ├── Home
+│     ├── Map
+│     ├── Contacts
+│     ├── History
+│     ├── Profile
+│     └── SOS
+│
+├── Widgets
+│
+└── Firebase
+      ├── Authentication
+      ├── Firestore
+      ├── Cloud Messaging
+      ├── Analytics
+      └── Crashlytics
+```
 
 ---
 
-## 📂 Estructura del proyecto
+# 🛠 Tecnologías utilizadas
+
+| Tecnología | Uso |
+|------------|-----|
+| Flutter | Desarrollo móvil |
+| Dart | Lenguaje de programación |
+| Firebase Authentication | Inicio de sesión |
+| Cloud Firestore | Base de datos |
+| Firebase Messaging | Notificaciones |
+| Firebase Analytics | Analítica |
+| Firebase Crashlytics | Reporte de errores |
+| Google Maps | Visualización de mapas |
+| Geolocator | Obtención del GPS |
+| Provider | Gestión de estado |
+
+---
+
+# 📂 Estructura del proyecto
 
 ```
 lib/
-│
-├── core/
-│   ├── routes/
-│   └── theme/
-│
-├── models/
-│
-├── providers/
-│
-├── screens/
-│   ├── auth/
-│   ├── contacts/
-│   ├── history/
-│   ├── home/
-│   ├── map/
-│   ├── profile/
-│   └── sos/
-│
-├── services/
-│
-├── widgets/
-│
-└── main.dart
+
+core/
+models/
+providers/
+screens/
+services/
+widgets/
+
+main.dart
+app.dart
 ```
 
 ---
 
-## ⚙️ Instalación
+# 🔥 Base de datos
 
-### Clonar el repositorio
+## users
+
+Información de cada usuario.
+
+```
+users
+ └── uid
+      ├── name
+      ├── email
+      ├── phone
+      └── createdAt
+```
+
+---
+
+## contacts
+
+Contactos de emergencia.
+
+```
+users
+ └── uid
+      └── contacts
+```
+
+---
+
+## emergency_alerts
+
+Alertas enviadas.
+
+```
+emergency_alerts
+
+uid
+
+latitude
+
+longitude
+
+message
+
+status
+
+createdAt
+```
+
+---
+
+# 📍 Flujo de la aplicación
+
+```
+Usuario
+
+↓
+
+Inicio de sesión
+
+↓
+
+Pantalla principal
+
+↓
+
+Mapa
+│
+├── Contactos
+├── Historial
+├── Perfil
+└── SOS
+
+↓
+
+Ubicación GPS
+
+↓
+
+Firestore
+
+↓
+
+Registro de alerta
+```
+
+---
+
+# 🚀 Instalación
+
+## Clonar el proyecto
 
 ```bash
 git clone https://github.com/DiegoM-Hack/SafeWalk.git
 ```
 
-Ingresar al proyecto
+Entrar al proyecto
 
 ```bash
 cd SafeWalk
@@ -101,7 +251,7 @@ Instalar dependencias
 flutter pub get
 ```
 
-Ejecutar la aplicación
+Ejecutar
 
 ```bash
 flutter run
@@ -113,103 +263,35 @@ Generar APK
 flutter build apk --release
 ```
 
-El APK generado se encontrará en:
-
-```
-build/app/outputs/flutter-apk/app-release.apk
-```
-
 ---
 
-## 🔥 Configuración de Firebase
+# ⚙ Configuración
 
-El proyecto utiliza Firebase para:
+El proyecto requiere una configuración previa de Firebase.
 
-- Authentication
-- Cloud Firestore
-- Firebase Messaging
-- Firebase Analytics
-- Firebase Storage
-
-Es necesario agregar el archivo:
+Es necesario incluir:
 
 ```
 android/app/google-services.json
 ```
 
-y configurar Firebase según la documentación oficial de FlutterFire.
+y configurar:
+
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Messaging
+- Firebase Analytics
+- Firebase Crashlytics
+
 
 ---
 
-## 🗄 Base de datos (Firestore)
+# 👥 Equipo de desarrollo
 
-Colecciones principales:
+Proyecto desarrollado por estudiantes de la
 
-```
-users
-```
-
-Información de cada usuario.
-
-```
-users/{uid}/contacts
-```
-
-Contactos de emergencia.
-
-```
-emergency_alerts
-```
-
-Alertas SOS enviadas.
-
-Cada alerta contiene:
-
-```
-uid
-latitude
-longitude
-message
-status
-createdAt
-updatedAt
-finishedAt
-```
+**Escuela Politécnica Nacional**
+**ESFOT**
 
 ---
 
-## 📍 Flujo de la alerta SOS
-
-```
-Usuario
-
-↓
-
-Presiona SOS
-
-↓
-
-Confirma el envío
-
-↓
-
-Obtiene GPS
-
-↓
-
-Guarda alerta en Firestore
-
-↓
-
-Actualiza ubicación
-
-↓
-
-Finaliza la emergencia
-```
-
----
-
-## 👥 Integrantes
-
-Proyecto desarrollado por estudiantes de la ESFOT – Escuela Politécnica Nacional.
