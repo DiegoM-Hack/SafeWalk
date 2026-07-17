@@ -8,6 +8,7 @@ class UserModel {
   final String? photoUrl;
   final String provider;
   final bool isActive;
+  final String? fcmToken;
   final Timestamp createdAt;
   final Timestamp updatedAt;
   // NUEVO: token FCM del dispositivo actual del usuario. Se usa para poder
@@ -22,6 +23,7 @@ class UserModel {
     required this.email,
     required this.phone,
     this.photoUrl,
+    this.fcmToken,
     required this.provider,
     required this.isActive,
     required this.createdAt,
@@ -36,6 +38,7 @@ class UserModel {
       email: map["email"],
       phone: map["phone"],
       photoUrl: map["photoUrl"],
+      fcmToken: map["fcmToken"],
       provider: map["provider"],
       isActive: map["isActive"],
       createdAt: map["createdAt"],
@@ -51,6 +54,7 @@ class UserModel {
       "email": email,
       "phone": phone,
       "photoUrl": photoUrl,
+      "fcmToken": fcmToken,
       "provider": provider,
       "isActive": isActive,
       "createdAt": createdAt,

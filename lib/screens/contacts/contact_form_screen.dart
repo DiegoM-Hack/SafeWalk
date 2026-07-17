@@ -176,20 +176,18 @@ class _ContactFormScreenState extends State<ContactFormScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         labelText: 'Correo electrónico',
-                        hintText: 'Ej: juan@ejemplo.com',
+                        hintText: 'Ej: ejemplo@correo.com',
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
-                      keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'El correo es obligatorio.';
+                          return 'El correo electrónico es obligatorio.';
                         }
-                        if (!RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                        ).hasMatch(value.trim())) {
-                          return 'Ingresa un correo válido.';
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(value)) {
+                          return 'El correo electrónico no es válido.';
                         }
                         return null;
                       },

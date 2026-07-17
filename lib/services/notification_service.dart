@@ -1,4 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'user_service.dart';
 
@@ -10,33 +12,92 @@ class NotificationTypes {
 }
 
 class NotificationService {
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  NotificationService._();
+
+  static final NotificationService instance =
+      NotificationService._();
+
+  final FirebaseMessaging _messaging =
+      FirebaseMessaging.instance;
+
   final UserService _userService = UserService();
 
-  /// Se llama una vez el usuario inicia sesión (ver AuthProvider). Pide
-  /// permisos, obtiene el token FCM, lo guarda en `users/{uid}` y deja
-  /// escuchando renovaciones de token mientras la sesión siga activa.
-  Future<void> initialize({required String uid}) async {
-    await _messaging.requestPermission();
+  /// Inicializa FCM y guarda el token del usuario.
+  Future<void> initialize({String? uid}) async {
+    final settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-    final token = await _messaging.getToken();
-    if (token != null) {
-      await _userService.updateFcmToken(uid: uid, token: token);
+    debugPrint("Permiso FCM: ${settings.authorizationStatus}");
+
+    final token = await getToken();
+
+    debugPrint("FCM Token:");
+    debugPrint(token);
+
+    if (uid != null && token != null) {
+      await _userService.updateFcmToken(
+        uid: uid,
+        token: token,
+      );
+
+      _messaging.onTokenRefresh.listen((newToken) {
+        _userService.updateFcmToken(
+          uid: uid,
+          token: newToken,
+        );
+      });
     }
 
-    _messaging.onTokenRefresh.listen((newToken) {
-      _userService.updateFcmToken(uid: uid, token: newToken);
-    });
+    FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      _onNotificationOpened,
+    );
   }
 
   Future<String?> getToken() async {
     return await _messaging.getToken();
   }
 
-  /// Escucha notificaciones que llegan con la app abierta en primer plano.
-  /// [onLocationShareRequest] se invoca con el `shareId` cuando el mensaje
-  /// recibido es una solicitud de ubicación compartida, para que la UI
-  /// (ver `app.dart`) pueda mostrar el diálogo de aceptar/rechazar.
+  Future<void> sendNotification({
+    required String receiverUid,
+    required String senderUid,
+    required String alertId,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection("notifications")
+        .add({
+      "receiverUid": receiverUid,
+      "senderUid": senderUid,
+      "alertId": alertId,
+      "type": "sos",
+      "status": "pending",
+      "createdAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> accept(String id) async {
+    await FirebaseFirestore.instance
+        .collection("notifications")
+        .doc(id)
+        .update({
+      "status": "accepted",
+    });
+  }
+
+  Future<void> reject(String id) async {
+    await FirebaseFirestore.instance
+        .collection("notifications")
+        .doc(id)
+        .update({
+      "status": "rejected",
+    });
+  }
+
+  /// Para la funcionalidad de compartir ubicación
   void listenForegroundMessages({
     required void Function(String shareId) onLocationShareRequest,
   }) {
@@ -45,8 +106,6 @@ class NotificationService {
     });
   }
 
-  /// Escucha el caso en que el usuario tocó la notificación con la app en
-  /// segundo plano (no cerrada) y la abrió desde ahí.
   void listenNotificationTaps({
     required void Function(String shareId) onLocationShareRequest,
   }) {
@@ -61,9 +120,20 @@ class NotificationService {
   ) {
     if (data['type'] == NotificationTypes.locationShareRequest) {
       final shareId = data['shareId'] as String?;
+
       if (shareId != null && shareId.isNotEmpty) {
         onLocationShareRequest(shareId);
       }
     }
+  }
+
+  void _onForegroundMessage(RemoteMessage message) {
+    debugPrint("Notificación recibida");
+    debugPrint(message.notification?.title);
+    debugPrint(message.notification?.body);
+  }
+
+  void _onNotificationOpened(RemoteMessage message) {
+    debugPrint("El usuario abrió una notificación");
   }
 }
