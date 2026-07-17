@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/routes/app_routes.dart';
 import '../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/location_share_provider.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -13,6 +14,9 @@ class AppDrawer extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.user;
     final theme = Theme.of(context);
+    // NUEVO: cantidad de solicitudes de ubicación pendientes, para el
+    // badge junto al ítem del drawer.
+    final pendingCount = context.watch<LocationShareProvider>().pendingRequests.length;
 
     return Drawer(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -82,6 +86,16 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).pushNamed(AppRoutes.history);
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.location_on_outlined,
+              label: pendingCount > 0
+                  ? 'Ubicaciones compartidas ($pendingCount)'
+                  : 'Ubicaciones compartidas',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed(AppRoutes.incomingShares);
               },
             ),
             _DrawerItem(

@@ -255,10 +255,29 @@ class _SOSScreenState extends State<SOSScreen> {
                 label: const Text("FINALIZAR SOS"),
                 onPressed: () async {
                   locationProvider.stopTracking();
+<<<<<<< HEAD
                   await sosProvider.finishSOS();
+=======
+
+                  final ok = await sosProvider.finishSOS();
+
+>>>>>>> b7b26ef65e4fd123a52165e174304e319f87b7d3
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
+<<<<<<< HEAD
                     const SnackBar(content: Text("Emergencia finalizada.")),
+=======
+                    SnackBar(
+                      backgroundColor:
+                          ok ? AppColors.success : AppColors.danger,
+                      content: Text(
+                        ok
+                            ? "Emergencia finalizada."
+                            : sosProvider.errorMessage ??
+                                "No se pudo finalizar la emergencia.",
+                      ),
+                    ),
+>>>>>>> b7b26ef65e4fd123a52165e174304e319f87b7d3
                   );
                 },
               ),
