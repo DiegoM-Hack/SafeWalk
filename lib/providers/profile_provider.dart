@@ -5,10 +5,14 @@ import '../models/user_model.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../services/user_service.dart';
 
 class ProfileProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  // NUEVO: para mantener sincronizado el índice teléfono -> uid que usa
+  // "Compartir ubicación" cuando el usuario cambia su teléfono.
+  final UserService _userService = UserService();
 
   UserModel? _currentUser;
   bool _isLoading = false;
@@ -69,6 +73,8 @@ class ProfileProvider with ChangeNotifier {
           .collection('users')
           .doc(user.uid)
           .update(_currentUser!.toMap());
+
+      await _userService.setPhoneIndex(phone: phone, uid: user.uid);
 
       _isLoading = false;
       notifyListeners();

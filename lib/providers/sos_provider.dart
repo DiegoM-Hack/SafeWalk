@@ -83,7 +83,7 @@ class SOSProvider extends ChangeNotifier {
   }
 
   Future<bool> finishSOS() async {
-    if (_currentAlertId == null) return false;
+    if (_currentAlertId == null) return true;
 
     try {
       await _sosService.finishAlert(_currentAlertId!);
@@ -93,15 +93,15 @@ class SOSProvider extends ChangeNotifier {
       _errorMessage = null;
 
       notifyListeners();
-
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint("========== ERROR AL FINALIZAR SOS ==========");
       debugPrint(e.toString());
+      debugPrintStack(stackTrace: stackTrace);
+      debugPrint("=============================================");
 
       _errorMessage = e.toString();
-
       notifyListeners();
-
       return false;
     }
   }

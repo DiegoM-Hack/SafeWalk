@@ -75,11 +75,21 @@ service cloud.firestore {
                               && resource.data.uid == request.auth.uid;
     }
 
-    // Alertas SOS (podrán ajustarlas cuando implementen esa funcionalidad)
+    // Alertas SOS
     match /emergency_alerts/{alertId} {
-      allow create: if signedIn();
+      allow create: if signedIn()
+                      && request.resource.data.uid == request.auth.uid;
+
       allow read: if signedIn();
-      allow update, delete: if false;
+
+      // Solo el dueño de la alerta puede actualizarla (por ejemplo,
+      // para actualizar la ubicación en vivo o para finalizar el SOS),
+      // y solo puede tocar esos campos, no reasignar la alerta a otro uid.
+      allow update: if signedIn()
+                      && resource.data.uid == request.auth.uid
+                      && request.resource.data.uid == resource.data.uid;
+
+      allow delete: if false;
     }
   }
 }

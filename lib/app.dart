@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'core/routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'models/location_share_model.dart';
+import 'providers/location_share_provider.dart';
+import 'screens/map/share_request_dialog.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -44,6 +48,12 @@ class _AppState extends State<App> {
         return Stack(
           children: [
             if (child != null) child,
+            // Paso 2 del flujo de ubicación compartida: apenas llega una
+            // solicitud pendiente nueva (por Firestore en tiempo real, o
+            // por push si la app estaba en primer plano), se muestra el
+            // diálogo de aceptar/rechazar sin importar en qué pantalla
+            // esté el usuario.
+            _PendingShareListener(navigatorKey: _navigatorKey),
             ValueListenableBuilder<String?>(
               valueListenable: _currentRoute,
               builder: (context, routeName, _) {
@@ -93,6 +103,53 @@ class _SosRouteObserver extends NavigatorObserver {
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
     currentRoute.value = newRoute?.settings.name;
+  }
+}
+
+/// Escucha `LocationShareProvider.pendingRequests` y muestra
+/// `ShareRequestDialog` apenas aparece una solicitud nueva, sobre
+/// cualquier pantalla. No renderiza nada visible por sí mismo.
+class _PendingShareListener extends StatefulWidget {
+  final GlobalKey<NavigatorState> navigatorKey;
+  const _PendingShareListener({required this.navigatorKey});
+
+  @override
+  State<_PendingShareListener> createState() => _PendingShareListenerState();
+}
+
+class _PendingShareListenerState extends State<_PendingShareListener> {
+  final Set<String> _shownIds = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LocationShareProvider>(
+      builder: (context, provider, _) {
+        final pending = provider.pendingRequests;
+
+        // Se agenda después del frame actual para no llamar showDialog
+        // en medio de un build.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          for (final request in pending) {
+            if (_shownIds.contains(request.id)) continue;
+            _shownIds.add(request.id);
+            _showRequestDialog(request);
+          }
+        });
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  void _showRequestDialog(LocationShareModel request) {
+    final navContext = widget.navigatorKey.currentContext;
+    if (navContext == null) return;
+
+    showDialog(
+      context: navContext,
+      barrierDismissible: false,
+      builder: (_) => ShareRequestDialog(request: request),
+    );
   }
 }
 
