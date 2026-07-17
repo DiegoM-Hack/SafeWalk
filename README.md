@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fe8ac5362b0a58d6804c15da6da35387114e5a8e
 # 🛡️ SafeWalk — Llega seguro a casa
 
 [![Flutter](https://img.shields.io/badge/Flutter-Framework-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
@@ -98,6 +101,7 @@ lib/
 │   └── sos/               # Pantalla de emergencia y alerta activa
 ├── services/              # Conectores externos (Firestore, Location, Directions API, Notifications)
 └── widgets/               # Componentes reutilizables de UI
+<<<<<<< HEAD
 =======
 # 🛡️ SafeWalk
 
@@ -242,6 +246,8 @@ app.dart
 ```
 
 ---
+=======
+>>>>>>> fe8ac5362b0a58d6804c15da6da35387114e5a8e
 
 # 🔥 Base de datos
 
@@ -395,4 +401,7 @@ Proyecto desarrollado por estudiantes de la
 
 ---
 
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> fe8ac5362b0a58d6804c15da6da35387114e5a8e

@@ -11,6 +11,11 @@ class UserModel {
   final String? fcmToken;
   final Timestamp createdAt;
   final Timestamp updatedAt;
+  // NUEVO: token FCM del dispositivo actual del usuario. Se usa para poder
+  // enviarle una notificación push (por ejemplo, una solicitud de
+  // "compartir ubicación en tiempo real"). Puede ser null si el usuario
+  // nunca dio permiso de notificaciones o aún no se ha sincronizado.
+
 
   UserModel({
     required this.uid,
@@ -23,6 +28,7 @@ class UserModel {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -37,6 +43,7 @@ class UserModel {
       isActive: map["isActive"],
       createdAt: map["createdAt"],
       updatedAt: map["updatedAt"],
+    
     );
   }
 
@@ -52,6 +59,30 @@ class UserModel {
       "isActive": isActive,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
+      "fcmToken": fcmToken,
     };
+  }
+
+  UserModel copyWith({
+    String? name,
+    String? email,
+    String? phone,
+    String? photoUrl,
+    bool? isActive,
+    Timestamp? updatedAt,
+    String? fcmToken,
+  }) {
+    return UserModel(
+      uid: uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      photoUrl: photoUrl ?? this.photoUrl,
+      provider: provider,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      fcmToken: fcmToken ?? this.fcmToken,
+    );
   }
 }

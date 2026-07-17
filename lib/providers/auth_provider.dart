@@ -4,12 +4,18 @@ import 'package:flutter/material.dart';
 
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
-import '../services/user_service.dart';
 import '../services/notification_service.dart';
+import '../services/user_service.dart';
+
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final UserService _userService = UserService();
+  // NUEVO: se usa para guardar el token FCM del usuario apenas inicia
+  // sesión, requisito para poder enviarle notificaciones push (por
+  // ejemplo, solicitudes de "compartir ubicación en tiempo real").
+  final NotificationService _notificationService =
+    NotificationService.instance;
 
   User? _firebaseUser;
   UserModel? _userModel;
@@ -40,6 +46,9 @@ class AuthProvider extends ChangeNotifier {
 
   if (firebaseUser != null) {
     _userModel = await _userService.getUser(firebaseUser.uid);
+    // No se espera (await) a propósito: no debe bloquear el arranque de
+    // la app si el usuario aún no responde el permiso de notificaciones.
+    _notificationService.initialize(uid: firebaseUser.uid);
   } else {
     _userModel = null;
   }
@@ -64,7 +73,7 @@ class AuthProvider extends ChangeNotifier {
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: uid,
         token: token,
       );
@@ -110,11 +119,14 @@ class AuthProvider extends ChangeNotifier {
         updatedAt: Timestamp.now(),
       );
 
+      // createUser ya guarda el índice teléfono -> uid (ver UserService),
+      // necesario para poder vincular contactos de emergencia con cuentas
+      // reales de SafeWalk y así habilitar "Compartir ubicación".
       await _userService.createUser(user);
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: firebaseUser.uid,
         token: token,
       );
@@ -173,7 +185,7 @@ class AuthProvider extends ChangeNotifier {
 
       final token = await NotificationService.instance.getToken();
 
-      await _userService.updateFCMToken(
+      await _userService.updateFcmToken(
         uid: uid,
         token: token,
       );

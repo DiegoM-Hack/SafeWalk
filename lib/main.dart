@@ -9,6 +9,7 @@ import 'providers/location_provider.dart';
 import 'providers/trip_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/history_provider.dart';
+import 'providers/location_share_provider.dart';
 import 'services/notification_service.dart';
 import 'providers/app_notification_provider.dart';
 import 'providers/chat_provider.dart';
@@ -47,6 +48,11 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => HistoryProvider(),
         ),
+        // NUEVO: estado del flujo "Compartir ubicación en tiempo real"
+        // (solicitudes pendientes, sesiones activas, tracking propio).
+        ChangeNotifierProvider(
+          create: (_) => LocationShareProvider()
+          ),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(),
         ),

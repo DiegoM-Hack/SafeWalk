@@ -4,79 +4,111 @@ import 'package:flutter/cupertino.dart';
 import '../models/user_model.dart';
 
 class UserService {
-
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final String collection = "users";
+  final String _phoneIndexCollection = "phone_index";
 
   Future<void> createUser(UserModel user) async {
-
     await _firestore
         .collection(collection)
         .doc(user.uid)
         .set(user.toMap());
 
+    await setPhoneIndex(
+      phone: user.phone,
+      uid: user.uid,
+    );
   }
 
   Future<bool> exists(String uid) async {
-
     final doc = await _firestore
         .collection(collection)
         .doc(uid)
         .get();
 
     return doc.exists;
-
   }
 
   Future<UserModel?> getUser(String uid) async {
-
     final doc = await _firestore
         .collection(collection)
         .doc(uid)
         .get();
 
-    if(!doc.exists){
+    if (!doc.exists) {
       return null;
     }
 
     return UserModel.fromMap(doc.data()!);
-
   }
 
-  Future<void> updateFCMToken({
-  required String uid,
-  required String? token,
+  // ===============================
+  // PHONE INDEX
+  // ===============================
+
+  String normalizePhone(String phone) {
+    return phone.replaceAll(RegExp(r'[\s\-()]'), '');
+  }
+
+  Future<void> setPhoneIndex({
+    required String phone,
+    required String uid,
+  }) async {
+    final normalized = normalizePhone(phone);
+
+    if (normalized.isEmpty) return;
+
+    await _firestore
+        .collection(_phoneIndexCollection)
+        .doc(normalized)
+        .set({
+      "uid": uid,
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<String?> findUidByPhone(String phone) async {
+    final normalized = normalizePhone(phone);
+
+    if (normalized.isEmpty) return null;
+
+    final doc = await _firestore
+        .collection(_phoneIndexCollection)
+        .doc(normalized)
+        .get();
+
+    if (!doc.exists) return null;
+
+    return doc.data()?["uid"] as String?;
+  }
+
+  // ===============================
+  // FCM
+  // ===============================
+
+  Future<void> updateFcmToken({
+    required String uid,
+    required String? token,
   }) async {
     if (token == null) return;
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .update({
+    await _firestore.collection(collection).doc(uid).update({
       'fcmToken': token,
     });
   }
 
   Future<void> getFCMToken(String uid) async {
     final doc = await _firestore
-        .collection('users')
+        .collection(collection)
         .doc(uid)
         .get();
 
     if (doc.exists) {
-      final data = doc.data();
-      if (data != null && data.containsKey('fcmToken')) {
-        final token = data['fcmToken'] as String?;
-        debugPrint('FCM Token for user $uid: $token');
-      } else {
-        debugPrint('No FCM token found for user $uid.');
-      }
+      final token = doc.data()?["fcmToken"];
+      debugPrint("FCM Token de $uid: $token");
     } else {
-      debugPrint('User document does not exist for uid: $uid');
+      debugPrint("Usuario no encontrado");
     }
-    
   }
-
 }

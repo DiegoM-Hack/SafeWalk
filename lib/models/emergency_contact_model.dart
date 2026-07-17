@@ -8,7 +8,6 @@ class EmergencyContactModel {
   final String relationship;
   final String? linkedUid;
   final DateTime? createdAt;
-  bool get isLinkedToSafeWalk => linkedUid != null;
 
   EmergencyContactModel({
     required this.id,
@@ -19,6 +18,12 @@ class EmergencyContactModel {
     this.linkedUid,
     this.createdAt,
   });
+
+  /// Si el contacto ya está vinculado a una cuenta de SafeWalk.
+  bool get isSafeWalkUser => linkedUid != null && linkedUid!.isNotEmpty;
+
+  /// Método auxiliar para UI y lógica de enlace.
+  bool get isLinkedToSafeWalk => isSafeWalkUser;
 
   /// Crea el modelo a partir de un DocumentSnapshot de Firestore.
   factory EmergencyContactModel.fromDocument(DocumentSnapshot doc) {
@@ -82,6 +87,7 @@ class EmergencyContactModel {
     String? email,
     String? relationship,
     String? linkedUid,
+    DateTime? createdAt,
   }) {
     return EmergencyContactModel(
       id: id,
@@ -90,7 +96,7 @@ class EmergencyContactModel {
       email: email ?? this.email,
       relationship: relationship ?? this.relationship,
       linkedUid: linkedUid ?? this.linkedUid,
-      createdAt: createdAt,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

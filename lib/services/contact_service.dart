@@ -35,63 +35,20 @@ class ContactService {
         );
   }
 
-  /// Busca un usuario registrado en SafeWalk mediante su correo.
-  /// Devuelve el UID si existe, caso contrario null.
-  Future<String?> findUserByEmail(String email) async {
-    final query = await _db
-        .collection('users')
-        .where('email', isEqualTo: email.trim().toLowerCase())
-        .limit(1)
-        .get();
-
-    if (query.docs.isEmpty) {
-      return null;
-    }
-
-    return query.docs.first.id;
-  }
-
-  /// Agrega un contacto.
-  /// Si el correo pertenece a un usuario registrado,
-  /// se guarda automáticamente el linkedUid.
   Future<void> addContact(EmergencyContactModel contact) async {
-    final linkedUid = await findUserByEmail(contact.email);
-
-    final newContact = contact.copyWith(
-      linkedUid: linkedUid,
-    );
-
-    await _contactsRef.add(newContact.toFirestore());
+    await _contactsRef.add(contact.toFirestore());
   }
 
-  /// Actualiza un contacto.
-  /// Si cambia el correo también se vuelve a verificar
-  /// si pertenece a un usuario registrado.
   Future<void> updateContact(EmergencyContactModel contact) async {
-    final linkedUid = await findUserByEmail(contact.email);
+    await _contactsRef.doc(contact.id).update(contact.toFirestore());
+  }
 
-    final updatedContact = contact.copyWith(
-      linkedUid: linkedUid,
-    );
-
-    await _contactsRef
-        .doc(contact.id)
-        .update(updatedContact.toFirestore());
+  Future<void> setLinkedUid(String contactId, String? linkedUid) async {
+    await _contactsRef.doc(contactId).update({'linkedUid': linkedUid});
   }
 
   /// Elimina un contacto.
   Future<void> deleteContact(String contactId) async {
     await _contactsRef.doc(contactId).delete();
-  }
-
-  /// Devuelve únicamente los contactos que tienen cuenta
-  /// en SafeWalk (linkedUid != null).
-  Future<List<EmergencyContactModel>> getLinkedContacts() async {
-    final snapshot = await _contactsRef.get();
-
-    return snapshot.docs
-        .map((doc) => EmergencyContactModel.fromDocument(doc))
-        .where((contact) => contact.linkedUid != null)
-        .toList();
   }
 }
