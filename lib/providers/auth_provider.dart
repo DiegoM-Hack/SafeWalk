@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
+import '../services/notification_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -59,6 +60,15 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
 
+      final uid = _authService.currentUser!.uid;
+
+      final token = await NotificationService.instance.getToken();
+
+      await _userService.updateFCMToken(
+        uid: uid,
+        token: token,
+      );
+
       _errorMessage = null;
       return true;
     } on FirebaseAuthException catch (e) {
@@ -91,7 +101,7 @@ class AuthProvider extends ChangeNotifier {
       final user = UserModel(
         uid: firebaseUser.uid,
         name: name,
-        email: email,
+        email: email.trim().toLowerCase(),
         phone: phone,
         photoUrl: null,
         provider: "email",
@@ -101,6 +111,13 @@ class AuthProvider extends ChangeNotifier {
       );
 
       await _userService.createUser(user);
+
+      final token = await NotificationService.instance.getToken();
+
+      await _userService.updateFCMToken(
+        uid: firebaseUser.uid,
+        token: token,
+      );
 
       _userModel = user;
 
@@ -129,11 +146,20 @@ class AuthProvider extends ChangeNotifier {
       final exists =
           await _userService.exists(firebaseUser.uid);
 
+      final uid = _authService.currentUser!.uid;
+
+      final token = await NotificationService.instance.getToken();
+
+      await _userService.updateFCMToken(
+        uid: uid,
+        token: token,
+      );
+
       if (!exists) {
         final user = UserModel(
           uid: firebaseUser.uid,
           name: firebaseUser.displayName ?? "",
-          email: firebaseUser.email ?? "",
+          email: firebaseUser.email ?? "".trim().toLowerCase(),
           phone: firebaseUser.phoneNumber ?? "",
           photoUrl: firebaseUser.photoURL,
           provider: "google",
