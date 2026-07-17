@@ -9,6 +9,9 @@ import 'providers/location_provider.dart';
 import 'providers/trip_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/history_provider.dart';
+import 'services/notification_service.dart';
+import 'providers/app_notification_provider.dart';
+import 'providers/chat_provider.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -17,6 +20,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await NotificationService.instance.initialize();
 
   runApp(
     MultiProvider(
@@ -41,6 +46,12 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => HistoryProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(),
         ),
       ],
       child: const App(),
